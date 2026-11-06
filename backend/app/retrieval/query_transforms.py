@@ -102,3 +102,7 @@ class QueryTransformer:
             step_back_query=step_back,
             hypothetical_document=hyde_doc,
         )
+
+    rewrite = rewrite_query
+    expand = expand_query
+    step_back = generate_step_back_query

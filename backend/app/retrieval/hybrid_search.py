@@ -45,6 +45,9 @@ class HybridRetrievalBundle(BaseModel):
     metadata: RetrievalMetadata = Field(...)
 
 
+RetrievalBundle = HybridRetrievalBundle
+
+
 class HybridRetriever:
     """Enterprise hybrid search engine enforcing vector-level ACLs and defense-in-depth."""
 

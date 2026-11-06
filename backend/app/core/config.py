@@ -86,6 +86,9 @@ class Settings(BaseSettings):
     llm_primary_model: str = Field(
         default="gemini/gemini-1.5-pro", description="Primary generation model"
     )
+    llm_strong_model: str = Field(
+        default="gemini/gemini-1.5-pro", description="Primary strong generation model"
+    )
     llm_fast_model: str = Field(
         default="gemini/gemini-1.5-flash", description="Fast classification/grading model"
     )
