@@ -1,0 +1,32 @@
+name: Security & Permission Gates
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  permission-leak-check:
+    name: Zero Permission Leak Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install uv
+          uv pip install --system -e ".[dev]"
+
+      - name: Run Zero-Leak Permission Matrix Tests
+        env:
+          APP_ENV: test
+          QDRANT_USE_IN_MEMORY: "true"
+        run: |
+          pytest backend/tests/security/test_permission_leak.py -v --strict-markers

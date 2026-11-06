@@ -1,0 +1,35 @@
+name: Evaluation & Regression Gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - 'backend/app/retrieval/**'
+      - 'backend/app/agent/**'
+      - 'evaluation/**'
+
+jobs:
+  ragas-evaluation:
+    name: RAG Evaluation & Regression Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install uv
+          uv pip install --system -e ".[dev]"
+
+      - name: Run Evaluation Harness
+        env:
+          APP_ENV: test
+          QDRANT_USE_IN_MEMORY: "true"
+        run: |
+          python evaluation/run_eval.py --gate-check --min-faithfulness 0.85 --min-context-precision 0.80
