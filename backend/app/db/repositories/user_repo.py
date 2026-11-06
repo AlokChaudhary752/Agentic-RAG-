@@ -17,7 +17,9 @@ class UserRepository:
     async def get_by_id(self, user_id: str) -> UserEntity | None:
         """Fetch user by primary key ID."""
         result = await self.session.execute(
-            select(UserEntity).options(selectinload(UserEntity.groups)).where(UserEntity.id == user_id)
+            select(UserEntity)
+            .options(selectinload(UserEntity.groups))
+            .where(UserEntity.id == user_id)
         )
         return result.scalar_one_or_none()
 

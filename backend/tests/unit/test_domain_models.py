@@ -33,13 +33,19 @@ def test_document_acl_permits_user_scenarios() -> None:
     assert acl.permits_user("user_alice", ["group_finance"], ClassificationLevel.INTERNAL) is False
 
     # 2. User with matching user_id and clearance succeeds
-    assert acl.permits_user("user_alice", ["group_engineering"], ClassificationLevel.CONFIDENTIAL) is True
+    assert (
+        acl.permits_user("user_alice", ["group_engineering"], ClassificationLevel.CONFIDENTIAL)
+        is True
+    )
 
     # 3. User with matching group and clearance succeeds
     assert acl.permits_user("user_bob", ["group_finance"], ClassificationLevel.CONFIDENTIAL) is True
 
     # 4. User without matching user_id or group fails even with clearance
-    assert acl.permits_user("user_charlie", ["group_engineering"], ClassificationLevel.RESTRICTED) is False
+    assert (
+        acl.permits_user("user_charlie", ["group_engineering"], ClassificationLevel.RESTRICTED)
+        is False
+    )
 
     # 5. Open ACL (no user or group restrictions) succeeds if clearance is sufficient
     open_acl = DocumentACL(

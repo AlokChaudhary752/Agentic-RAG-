@@ -1,6 +1,8 @@
 """Qdrant vector database client wrapper supporting hybrid vectors and ACL pre-filtering."""
 
 import contextlib
+import uuid
+from datetime import UTC
 from typing import Any
 
 from qdrant_client import QdrantClient
@@ -42,6 +44,10 @@ class QdrantService:
                     error=str(exc),
                 )
                 self.client = QdrantClient(":memory:")
+
+        # Initialize collection and indexes idempotently
+        with contextlib.suppress(Exception):
+            self.init_collection()
 
     def init_collection(self) -> None:
         """Create Qdrant collection and payload indexes for ACL fields idempotently."""
@@ -105,6 +111,12 @@ class QdrantService:
             # Use provided dense vector or calculate deterministic synthetic embedding
             vec = chunk.dense_vector or self._generate_synthetic_vector(chunk.content)
 
+            try:
+                uuid.UUID(chunk.id)
+                point_id = chunk.id
+            except ValueError:
+                point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, chunk.id))
+
             payload: dict[str, Any] = {
                 "chunk_id": chunk.id,
                 "doc_id": chunk.doc_id,
@@ -133,7 +145,7 @@ class QdrantService:
 
             points.append(
                 qmodels.PointStruct(
-                    id=chunk.id,
+                    id=point_id,
                     vector=vec,
                     payload=payload,
                 )
@@ -184,10 +196,11 @@ class QdrantService:
 
         # Access clauses:
         # Document is accessible if:
-        # 1. No user restrictions AND no group restrictions (open to clearance)
+        # 1. No group restrictions (is_empty) -> open to everyone with that clearance
         # 2. OR principal.user_id is in allowed_users
         # 3. OR any of principal.groups is in allowed_groups
         access_conditions: list[qmodels.Condition] = [
+            qmodels.IsEmptyCondition(is_empty=qmodels.PayloadField(key="allowed_groups")),
             qmodels.FieldCondition(
                 key="allowed_users",
                 match=qmodels.MatchValue(value=principal.user_id),
@@ -202,8 +215,6 @@ class QdrantService:
                 )
             )
 
-        # Documents with empty allowed_users AND empty allowed_groups are open to anyone with the clearance
-        # In Qdrant, we model this via should match
         filter_clause = qmodels.Filter(
             must=[
                 tenant_condition,
@@ -213,3 +224,69 @@ class QdrantService:
         )
 
         return filter_clause
+
+    def search_with_acl(
+        self,
+        query_vector: list[float],
+        principal: UserPrincipal,
+        top_k: int = 10,
+    ) -> list[DocumentChunk]:
+        """Execute nearest neighbor vector search with HNSW-level ACL pre-filtering."""
+        from datetime import datetime
+
+        from app.domain.models import ClassificationLevel, DocStatus, DocumentACL
+
+        self.init_collection()
+        acl_filter = self.build_acl_filter(principal)
+
+        response = self.client.query_points(
+            collection_name=self.collection_name,
+            query=query_vector,
+            query_filter=acl_filter,
+            limit=top_k,
+        )
+
+        chunks: list[DocumentChunk] = []
+        for point in response.points:
+            payload = point.payload or {}
+            acl = DocumentACL(
+                allowed_users=payload.get("allowed_users", []),
+                allowed_groups=payload.get("allowed_groups", []),
+                classification_level=ClassificationLevel.from_str(
+                    payload.get("classification_level", "INTERNAL")
+                ),
+            )
+            created_at = datetime.fromisoformat(
+                payload.get("created_at", datetime.now(UTC).isoformat())
+            )
+            updated_at = datetime.fromisoformat(
+                payload.get("updated_at", datetime.now(UTC).isoformat())
+            )
+
+            chunks.append(
+                DocumentChunk(
+                    id=str(point.id),
+                    doc_id=payload.get("doc_id", ""),
+                    parent_chunk_id=payload.get("parent_chunk_id"),
+                    chunk_index=int(payload.get("chunk_index", 0)),
+                    content=payload.get("content", ""),
+                    parent_content=payload.get("parent_content"),
+                    section_path=payload.get("section_path", ""),
+                    title=payload.get("title", ""),
+                    source=payload.get("source", "qdrant"),
+                    source_url=payload.get("source_url", ""),
+                    author=payload.get("author", ""),
+                    created_at=created_at,
+                    updated_at=updated_at,
+                    version=payload.get("version", "1.0"),
+                    doc_status=DocStatus(payload.get("doc_status", "approved")),
+                    authority_score=float(payload.get("authority_score", 0.8)),
+                    language=payload.get("language", "en"),
+                    owner_group=payload.get("owner_group", "group_general"),
+                    acl=acl,
+                    pii_flags=payload.get("pii_flags", []),
+                    tenant_id=payload.get("tenant_id", "tenant-nimbus-default"),
+                )
+            )
+
+        return chunks

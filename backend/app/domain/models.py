@@ -149,17 +149,17 @@ class DocumentChunk(BaseModel):
     section_path: str = Field(
         default="", description="Hierarchical section path (e.g. HR > Leaves > Sick Leave)"
     )
-    title: str = Field(..., description="Parent document title")
-    source: str = Field(..., description="Source system connector name")
-    source_url: str = Field(..., description="Deep link URL to document or section")
-    author: str = Field(..., description="Document author")
+    title: str = Field(default="Untitled Document", description="Parent document title")
+    source: str = Field(default="local_folder", description="Source system connector name")
+    source_url: str = Field(default="", description="Deep link URL to document or section")
+    author: str = Field(default="System", description="Document author")
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     version: str = Field(default="1.0", description="Document version string")
     doc_status: DocStatus = Field(default=DocStatus.APPROVED, description="Lifecycle status")
     authority_score: float = Field(default=0.8, description="Credibility score")
     language: str = Field(default="en", description="Language code")
-    owner_group: str = Field(..., description="Owning group")
+    owner_group: str = Field(default="group_all", description="Owning group")
     acl: DocumentACL = Field(..., description="Chunk-level ACL inherited from document/section")
     pii_flags: list[str] = Field(
         default_factory=list, description="PII categories detected in this chunk"
