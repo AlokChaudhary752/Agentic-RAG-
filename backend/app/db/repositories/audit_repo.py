@@ -81,3 +81,4 @@ class AuditRepository:
     def delete(self, *args: Any, **kwargs: Any) -> None:
         """Enforce append-only constraint: deletions are strictly forbidden."""
         raise PermissionError("Audit logs are strictly immutable and cannot be deleted.")
+

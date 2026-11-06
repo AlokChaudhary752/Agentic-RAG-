@@ -89,3 +89,4 @@ async def test_audit_service_operations(
         details="Attempted access to hr-exec-comp-2026 without executive clearance",
     )
     assert alert_entry.severity == "CRITICAL"
+

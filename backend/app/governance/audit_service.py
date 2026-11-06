@@ -101,3 +101,4 @@ class AuditService:
             correlation_id=correlation_id,
             metadata_payload={"event_type": event_type, "details": details},
         )
+

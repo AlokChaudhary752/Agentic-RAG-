@@ -39,6 +39,7 @@ class ReadinessResponse(BaseModel):
 
 
 @router.get("/health", response_model=HealthResponse, status_code=status.HTTP_200_OK)
+@router.get("/health/liveness", response_model=HealthResponse, status_code=status.HTTP_200_OK)
 async def liveness_check() -> HealthResponse:
     """Basic liveness probe confirming the HTTP server is responsive."""
     settings = get_settings()
@@ -52,6 +53,7 @@ async def liveness_check() -> HealthResponse:
 
 
 @router.get("/health/ready", response_model=ReadinessResponse)
+@router.get("/health/readiness", response_model=ReadinessResponse)
 async def readiness_check() -> ReadinessResponse:
     """Readiness probe checking state of local or container dependencies."""
     # Check component availability with graceful status report
