@@ -30,3 +30,4 @@ jobs:
           QDRANT_USE_IN_MEMORY: "true"
         run: |
           pytest backend/tests/security/test_permission_leak.py -v --strict-markers
+

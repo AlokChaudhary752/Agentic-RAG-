@@ -21,3 +21,4 @@ This document outlines the security architecture and STRIDE threat analysis for 
 1. **Pre-Filter**: Enforced inside Qdrant HNSW vector traversal.
 2. **Post-Assertion**: In-memory verification of every candidate payload against the calling user's principal before LLM synthesis.
 3. **Audit Trigger**: Immediate high-severity alert logged if the secondary assertion intercepts an unauthorized chunk.
+

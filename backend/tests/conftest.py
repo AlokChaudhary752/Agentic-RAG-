@@ -4,8 +4,10 @@ from collections.abc import AsyncGenerator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import Settings, get_settings
+from app.db.models import Base
 from app.main import create_app
 
 
@@ -23,10 +25,28 @@ def test_settings() -> Settings:
     )
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def override_settings(test_settings: Settings) -> None:
     """Apply test settings to the lru_cache."""
     get_settings.cache_clear()
+
+
+@pytest.fixture
+async def async_session() -> AsyncGenerator[AsyncSession, None]:
+    """Provide an isolated, in-memory SQLite async database session."""
+    engine = create_async_engine(
+        "sqlite+aiosqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+    )
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    session_maker = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+    async with session_maker() as session:
+        yield session
+        await session.rollback()
+
+    await engine.dispose()
 
 
 @pytest.fixture

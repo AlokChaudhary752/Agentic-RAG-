@@ -42,3 +42,4 @@ python evaluation/run_eval.py
 - **Database Connection Refused**: Verify PostgreSQL is running on port 5432 or configure SQLite fallback `DATABASE_URL=sqlite+aiosqlite:///./enterprise_agent.db`.
 - **Qdrant Port Conflict**: Ensure Qdrant is available on 6333 or set `QDRANT_USE_IN_MEMORY=true` for local embedded operation.
 - **Permission Leak Alert**: If a `PermissionLeakError` is logged, examine the audit trail in PostgreSQL table `audit_logs` where `severity = 'SECURITY_ALERT'`.
+

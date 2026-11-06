@@ -32,3 +32,4 @@ We adopt **Qdrant** (v1.11+) as the primary vector storage and retrieval engine,
 
 ### Mitigations
 - Document ingestion pipeline runs transactional or idempotent updates, upserting to both PostgreSQL and Qdrant with content hash checks and deletion tracking.
+

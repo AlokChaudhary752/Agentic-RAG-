@@ -23,3 +23,4 @@ The evaluation harness validates that the Enterprise Knowledge Agent delivers hi
 - **Permission Leak Rate**: MUST BE 0.00% across all user roles and test vectors.
 - **Abstention Accuracy**: Correctly responding "I don't know" when evidence is insufficient.
 - **Latency (p50 / p95)**: Round-trip response time.
+

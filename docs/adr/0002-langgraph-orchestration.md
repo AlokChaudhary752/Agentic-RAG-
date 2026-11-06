@@ -34,3 +34,4 @@ We adopt **LangGraph** as the state machine and agent orchestration framework. T
 
 ### Mitigations
 - Define strict Pydantic models for `AgentState`, node inputs, and node outputs to maintain compile-time type safety.
+

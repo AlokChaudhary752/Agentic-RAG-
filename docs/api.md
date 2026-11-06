@@ -63,3 +63,4 @@ Prometheus exposition format for HTTP metrics, query counts, and latency histogr
 - `GET /api/v1/admin/documents`: List ingested documents with ACL metadata.
 - `POST /api/v1/admin/sync`: Trigger manual incremental connector synchronization.
 - `GET /api/v1/admin/audit`: Query immutable audit events.
+

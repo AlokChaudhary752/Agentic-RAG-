@@ -35,3 +35,4 @@ We enforce **ACL Pre-Filtering directly inside the vector engine index query**, 
 
 ### Mitigations
 - Schema creation scripts explicitly mark ACL fields as keyword payload indexes.
+

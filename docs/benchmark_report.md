@@ -17,3 +17,4 @@ This document tracks empirical evaluation results comparing the **Enterprise Kno
 | **Latency p50 / p95** | < 2.5s / 5.0s | *Pending Phase 6 Run* | *Pending Phase 6 Run* | -- |
 
 > Note: Real measured numbers will be populated during Phase 6 execution. No numbers are fabricated.
+

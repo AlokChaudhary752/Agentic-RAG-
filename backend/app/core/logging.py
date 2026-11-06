@@ -11,6 +11,7 @@ import uuid
 from typing import Any, cast
 
 import structlog
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 # Context variable holding correlation ID for the active async task
 correlation_id_ctx_var: contextvars.ContextVar[str] = contextvars.ContextVar(
@@ -107,35 +108,29 @@ def get_logger(name: str) -> structlog.stdlib.BoundLogger:
 class CorrelationIdMiddleware:
     """Pure ASGI middleware extracting or generating X-Correlation-ID for every incoming request."""
 
-    def __init__(self, app: Any) -> None:
+    def __init__(self, app: ASGIApp) -> None:
         self.app = app
 
-    async def __call__(self, scope: dict[str, Any], receive: Any, send: Any) -> None:
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
 
         headers = dict(scope.get("headers", []))
         header_corr_id = headers.get(b"x-correlation-id")
-        correlation_id = (
-            header_corr_id.decode("latin1") if header_corr_id else str(uuid.uuid4())
-        )
+        correlation_id = header_corr_id.decode("latin1") if header_corr_id else str(uuid.uuid4())
         correlation_id_ctx_var.set(correlation_id)
 
         header_tenant_id = headers.get(b"x-tenant-id")
         tenant_id = (
-            header_tenant_id.decode("latin1")
-            if header_tenant_id
-            else "tenant-nimbus-default"
+            header_tenant_id.decode("latin1") if header_tenant_id else "tenant-nimbus-default"
         )
         tenant_id_ctx_var.set(tenant_id)
 
-        async def send_with_correlation(message: dict[str, Any]) -> None:
+        async def send_with_correlation(message: Message) -> None:
             if message["type"] == "http.response.start":
                 response_headers = list(message.get("headers", []))
-                response_headers.append(
-                    (b"x-correlation-id", correlation_id.encode("latin1"))
-                )
+                response_headers.append((b"x-correlation-id", correlation_id.encode("latin1")))
                 message["headers"] = response_headers
             await send(message)
 

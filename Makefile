@@ -60,3 +60,4 @@ eval:
 
 demo:
 	$(PYTHON) scripts/demo.py
+
