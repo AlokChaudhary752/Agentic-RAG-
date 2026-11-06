@@ -188,12 +188,16 @@ class AuditLogEntity(Base):
         String(64), nullable=False, default="tenant-nimbus-default", index=True
     )
     user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    user_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     query: Mapped[str] = mapped_column(Text, nullable=False)
     retrieved_chunk_ids: Mapped[list[str]] = mapped_column(JSON, default=list)
     tool_called: Mapped[str | None] = mapped_column(String(128), nullable=True)
     tool_risk_level: Mapped[str | None] = mapped_column(String(32), nullable=True)
     action_approved: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     severity: Mapped[str] = mapped_column(String(32), default="INFO", index=True)
+    correlation_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    client_ip: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    metadata_payload: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC), index=True
     )

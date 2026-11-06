@@ -126,6 +126,9 @@ class PromptInjectionDetectedError(AppException):
         )
 
 
+PromptInjectionError = PromptInjectionDetectedError
+
+
 class BudgetExceededError(AppException):
     """Raised when request execution exceeds permitted financial or token limits."""
 

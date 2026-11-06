@@ -25,7 +25,11 @@ class UserRepository:
 
     async def get_by_email(self, email: str) -> UserEntity | None:
         """Fetch user by email."""
-        result = await self.session.execute(select(UserEntity).where(UserEntity.email == email))
+        result = await self.session.execute(
+            select(UserEntity)
+            .options(selectinload(UserEntity.groups))
+            .where(UserEntity.email == email)
+        )
         return result.scalar_one_or_none()
 
     async def get_principal(self, user_id: str) -> UserPrincipal | None:
@@ -44,6 +48,8 @@ class UserRepository:
             clearance=ClassificationLevel.from_str(user.clearance),
             tenant_id=user.tenant_id,
         )
+
+    resolve_principal = get_principal
 
     async def upsert_group(
         self,
