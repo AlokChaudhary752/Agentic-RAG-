@@ -45,3 +45,4 @@ class NotionConnector(BaseConnector):
         if not checkpoint:
             return docs
         return [d for d in docs if d.updated_at > checkpoint]
+
