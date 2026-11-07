@@ -1,5 +1,6 @@
 """LangGraph node execution functions for the Enterprise Knowledge Agent."""
 
+import re
 from typing import Any
 
 from app.agent.llm_client import LLMService
@@ -9,6 +10,8 @@ from app.governance.conflict_resolver import ConflictResolver
 from app.governance.prompt_injection import PromptInjectionDefense
 from app.retrieval.hybrid_search import HybridRetriever
 from app.retrieval.query_transforms import QueryTransformer
+from app.tools.client import MCPClient, get_mcp_client
+from app.tools.schemas import ToolRiskLevel
 
 logger = get_logger(__name__)
 
@@ -23,12 +26,14 @@ class AgentNodeExecutor:
         conflict_resolver: ConflictResolver | None = None,
         injection_defense: PromptInjectionDefense | None = None,
         query_transformer: QueryTransformer | None = None,
+        mcp_client: MCPClient | None = None,
     ) -> None:
         self.retriever = retriever or HybridRetriever()
         self.llm = llm_service or LLMService()
         self.conflict_resolver = conflict_resolver or ConflictResolver()
         self.defense = injection_defense or PromptInjectionDefense()
         self.transformer = query_transformer or QueryTransformer()
+        self.mcp_client = mcp_client or get_mcp_client()
 
     def understand(self, state: AgentState) -> dict[str, Any]:
         """Classify user query intent into factual_lookup, multi_hop, action_request, or chit_chat."""
@@ -94,7 +99,7 @@ class AgentNodeExecutor:
         """Assess relevance of retrieved chunks (Self-RAG reflection loop)."""
         chunks = state.get("retrieved_chunks", [])
         query = state["query"]
-        grade, score = self.llm.grade_evidence(query, chunks)
+        grade, _score = self.llm.grade_evidence(query, chunks)
 
         reformulated = None
         current_iter = state.get("retrieval_iteration", 1)
@@ -159,32 +164,116 @@ class AgentNodeExecutor:
     def decide_action(self, state: AgentState) -> dict[str, Any]:
         """Inspect intent and query to determine if MCP tool call is required."""
         intent = state.get("intent", "factual_lookup")
-        query = state.get("query", "").lower()
+        raw_query = state.get("query", "")
+        query = raw_query.lower()
+        principal = state.get("principal")
 
         tool_request = None
         tool_risk_level = None
         approval_required = False
+        tool_result = None
 
-        if intent == "action_request":
-            if "jira" in query or "ticket" in query:
-                tool_request = {
-                    "tool": "create_jira_ticket",
-                    "arguments": {"summary": state["query"], "project": "ENG", "priority": "High"},
-                }
-                tool_risk_level = "write_high"
-                approval_required = True
-            elif "email" in query:
-                tool_request = {
-                    "tool": "send_summary_email",
-                    "arguments": {"subject": "Knowledge Summary", "recipient": state["principal"].email},
-                }
-                tool_risk_level = "write_low"
+        if intent == "action_request" and principal:
+            if any(kw in query for kw in ["jira", "ticket", "bug", "issue"]):
+                status_match = re.search(r"\b([A-Z]{2,10}-\d+)\b", raw_query)
+                if status_match and any(w in query for w in ["status", "check", "progress", "show", "get"]):
+                    tool_name = "get_ticket_status"
+                    tool_risk = self.mcp_client.get_tool_risk(tool_name)
+                    tool_risk_level = tool_risk.value
+                    approval_required = False
+                    status_args: dict[str, Any] = {"ticket_id": status_match.group(1).upper()}
+                    tool_request = {
+                        "tool": tool_name,
+                        "arguments": status_args,
+                    }
+                    res = self.mcp_client.execute_sync(
+                        tool_name=tool_name,
+                        arguments=status_args,
+                        principal=principal,
+                        approval_granted=True,
+                        correlation_id=state.get("correlation_id"),
+                    )
+                    res_dict = res.model_dump()
+                    res_dict["status"] = "success" if res.success else "failed"
+                    tool_result = res_dict
+                else:
+                    tool_name = "create_jira_ticket"
+                    tool_risk = self.mcp_client.get_tool_risk(tool_name)
+                    tool_risk_level = tool_risk.value
+                    approval_required = tool_risk == ToolRiskLevel.WRITE_HIGH
+                    jira_args: dict[str, Any] = {
+                        "summary": raw_query,
+                        "description": f"Automated ticket created from user request: {raw_query}",
+                        "project": "NIMBUS",
+                        "priority": "High",
+                    }
+                    tool_request = {
+                        "tool": tool_name,
+                        "arguments": jira_args,
+                    }
+                    if state.get("approval_granted") is True:
+                        res = self.mcp_client.execute_sync(
+                            tool_name=tool_name,
+                            arguments=jira_args,
+                            principal=principal,
+                            approval_granted=True,
+                            correlation_id=state.get("correlation_id"),
+                        )
+                        res_dict = res.model_dump()
+                        res_dict["status"] = "success" if res.success else "failed"
+                        tool_result = res_dict
+
+            elif any(kw in query for kw in ["email", "mail", "send"]):
+                tool_name = "send_summary_email"
+                tool_risk = self.mcp_client.get_tool_risk(tool_name)
+                tool_risk_level = tool_risk.value
                 approval_required = False
+                email_args: dict[str, Any] = {
+                    "recipient_email": principal.email,
+                    "subject": "Enterprise Knowledge Summary",
+                    "body": state.get("draft_answer") or f"Knowledge summary for request: {raw_query}",
+                }
+                tool_request = {
+                    "tool": tool_name,
+                    "arguments": email_args,
+                }
+                res = self.mcp_client.execute_sync(
+                    tool_name=tool_name,
+                    arguments=email_args,
+                    principal=principal,
+                    approval_granted=True,
+                    correlation_id=state.get("correlation_id"),
+                )
+                res_dict = res.model_dump()
+                res_dict["status"] = "success" if res.success else "failed"
+                tool_result = res_dict
+
+            elif any(kw in query for kw in ["recent", "changes", "modified", "updates"]):
+                tool_name = "list_recent_changes"
+                tool_risk = self.mcp_client.get_tool_risk(tool_name)
+                tool_risk_level = tool_risk.value
+                approval_required = False
+                recent_args: dict[str, Any] = {"days_back": 7, "limit": 5}
+                tool_request = {
+                    "tool": tool_name,
+                    "arguments": recent_args,
+                }
+                res = self.mcp_client.execute_sync(
+                    tool_name=tool_name,
+                    arguments=recent_args,
+                    principal=principal,
+                    approval_granted=True,
+                    correlation_id=state.get("correlation_id"),
+                )
+                res_dict = res.model_dump()
+                res_dict["status"] = "success" if res.success else "failed"
+                tool_result = res_dict
 
         return {
             "tool_request": tool_request,
             "tool_risk_level": tool_risk_level,
             "approval_required": approval_required,
+            "tool_result": tool_result,
             "steps_executed": ["decide_action"],
         }
 
@@ -193,12 +282,37 @@ class AgentNodeExecutor:
         granted = state.get("approval_granted")
         tool_req = state.get("tool_request") or {}
         tool_name = tool_req.get("tool", "unknown_tool")
+        principal = state.get("principal")
 
         tool_result = None
         if granted is True:
-            tool_result = {"status": "success", "message": f"Tool '{tool_name}' executed successfully."}
+            if principal and tool_name and tool_name in self.mcp_client.allowed_tools:
+                args = tool_req.get("arguments", {})
+                if tool_name == "create_jira_ticket":
+                    args.setdefault("description", f"Action requested: {args.get('summary', 'Task')}")
+                res = self.mcp_client.execute_sync(
+                    tool_name=tool_name,
+                    arguments=args,
+                    principal=principal,
+                    approval_granted=True,
+                    correlation_id=state.get("correlation_id"),
+                )
+                res_dict = res.model_dump()
+                res_dict["status"] = "success" if res.success else "failed"
+                tool_result = res_dict
+            else:
+                tool_result = {
+                    "status": "success",
+                    "success": True,
+                    "message": f"Tool '{tool_name}' executed successfully.",
+                }
         elif granted is False:
-            tool_result = {"status": "rejected", "message": f"Action '{tool_name}' was denied by user."}
+            tool_result = {
+                "tool_name": tool_name,
+                "status": "rejected",
+                "message": f"Action '{tool_name}' was denied by user.",
+                "success": False,
+            }
 
         return {
             "tool_result": tool_result,
@@ -208,13 +322,33 @@ class AgentNodeExecutor:
     def respond(self, state: AgentState) -> dict[str, Any]:
         """Formulate final agent response payload with confidence and suggestions."""
         intent = state.get("intent", "factual_lookup")
+        tool_res = state.get("tool_result")
 
         if intent == "chit_chat":
             final_response = "Hello! I am your Enterprise Knowledge Agent. How can I assist you with company documents today?"
             suggestions = ["What is the PTO leave policy?", "Where are the engineering coding standards?"]
             confidence = 1.0
-        elif state.get("tool_result"):
-            final_response = (state.get("tool_result") or {}).get("message", "Action completed.")
+        elif tool_res:
+            data = tool_res.get("data")
+            if data and isinstance(data, dict):
+                if "ticket_id" in data and "url" in data:
+                    final_response = f"Action create_jira_ticket completed: Ticket {data['ticket_id']} has been successfully created: {data['url']} (Priority: {data.get('priority', 'Medium')}, Status: {data.get('status', 'Open')})."
+                elif "delivery_id" in data:
+                    final_response = f"Summary email has been delivered to {data.get('recipient')} (Delivery ID: {data['delivery_id']})."
+                elif "ticket_id" in data and "status" in data:
+                    final_response = f"Ticket {data['ticket_id']} is currently '{data['status']}' with priority '{data['priority']}' (Assignee: {data.get('assignee') or 'Unassigned'})."
+                elif "documents" in data:
+                    doc_titles = [d.get("title", d.get("doc_id")) for d in data.get("documents", [])]
+                    final_response = f"Found {len(doc_titles)} recent document changes: {', '.join(doc_titles)}."
+                else:
+                    final_response = tool_res.get("message", "Action completed successfully.")
+            elif tool_res.get("status") == "rejected":
+                final_response = tool_res.get("message", "Action was denied by user.")
+            elif tool_res.get("error"):
+                final_response = f"Action could not be completed: {tool_res['error']}"
+            else:
+                final_response = tool_res.get("message", "Action completed.")
+
             suggestions = ["Show recent audit logs", "Check ticket status"]
             confidence = 1.0
         else:

@@ -46,10 +46,16 @@ class LLMService:
 
         # Action requests
         action_pattern = re.compile(
-            r"\b(create|open|file|log|submit|send|update)\s+(?:a\s+|an\s+)?(jira|ticket|bug|issue|email)\b",
+            r"\b(create|open|file|log|submit|send|update|check|get|show|track|view)\s+(?:the\s+)?(?:status\s+of\s+)?(?:a\s+|an\s+)?(jira|ticket|bug|issue|email)\b",
             re.IGNORECASE,
         )
         if action_pattern.search(q):
+            return "action_request"
+
+        if re.search(r"\b(?:status\s+of\s+ticket|ticket\s+status)\b", q, re.IGNORECASE):
+            return "action_request"
+
+        if re.search(r"\b[A-Z]{2,10}-\d+\b", query) and any(w in q for w in ["status", "check", "progress"]):
             return "action_request"
 
         # Multi-hop queries
