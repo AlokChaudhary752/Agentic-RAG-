@@ -125,8 +125,14 @@ class Settings(BaseSettings):
     mcp_server_port: int = Field(default=8005, description="MCP server port")
 
     # Budgets & Limits
+    rate_limit_enabled: bool = Field(
+        default=True, description="Enable request rate limiting"
+    )
     rate_limit_requests_per_minute: int = Field(
         default=60, description="Max allowed requests per user per minute"
+    )
+    rate_limit_tenant_requests_per_minute: int = Field(
+        default=300, description="Max allowed requests per tenant per minute"
     )
     agent_max_iterations: int = Field(
         default=5, description="Maximum iterative reasoning cycles in LangGraph"

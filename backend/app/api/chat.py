@@ -2,17 +2,20 @@
 
 import asyncio
 import json
+import time
 import uuid
 from collections.abc import AsyncGenerator
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.agent.graph import create_agent_graph
 from app.agent.state import AgentState
-from app.api.auth import get_current_principal
+from app.core.cost_tracker import get_cost_tracker
+from app.core.rate_limit import verify_rate_limit
+from app.core.telemetry import AGENT_QUERY_COUNT, AGENT_REASONING_LATENCY
 from app.domain.models import UserPrincipal
 
 router = APIRouter(prefix="/chat", tags=["Chat & Agent"])
@@ -55,11 +58,19 @@ class ChatResponse(BaseModel):
 @router.post("/completions", response_model=ChatResponse)
 async def chat_completions(
     req: ChatRequest,
-    principal: Annotated[UserPrincipal, Depends(get_current_principal)],
+    principal: Annotated[UserPrincipal, Depends(verify_rate_limit)],
+    request: Request,
+    response: Response,
 ) -> Any:
-    """Execute stateful agent pipeline over authorized knowledge base with optional SSE streaming."""
+    """Execute stateful agent pipeline over authorized knowledge base with rate limiting and telemetry."""
+    start_time = time.perf_counter()
     thread_id = req.thread_id or str(uuid.uuid4())
     graph: Any = create_agent_graph()
+
+    # Apply rate limit headers to response
+    rl_headers = getattr(request.state, "rate_limit_headers", {})
+    for k, v in rl_headers.items():
+        response.headers[k] = v
 
     initial_state: AgentState = {
         "messages": [{"role": "user", "content": req.query}],
@@ -92,11 +103,38 @@ async def chat_completions(
                     yield f"data: {json.dumps(data)}\n\n"
             yield "data: [DONE]\n\n"
 
-        return StreamingResponse(event_generator(), media_type="text/event-stream")
+        return StreamingResponse(
+            event_generator(),
+            media_type="text/event-stream",
+            headers=rl_headers,
+        )
 
     # Execute graph off the event loop thread to prevent event loop blocking
     final_state: dict[str, Any] = dict(
         await asyncio.to_thread(graph.invoke, initial_state, config=config)
+    )
+
+    elapsed_seconds = time.perf_counter() - start_time
+    intent = final_state.get("intent", "factual_lookup")
+    status_label = "success" if final_state.get("final_response") else "error"
+
+    # Record Prometheus metrics
+    AGENT_QUERY_COUNT.labels(
+        tenant_id=principal.tenant_id,
+        intent=intent,
+        status=status_label,
+    ).inc()
+    AGENT_REASONING_LATENCY.labels(intent=intent).observe(elapsed_seconds)
+
+    # Track token usage & cost
+    cost_tracker = get_cost_tracker()
+    estimated_prompt_tokens = max(10, len(req.query.split()) * 2)
+    estimated_completion_tokens = max(15, len(final_state.get("final_response", "").split()) * 2)
+    cost_tracker.track_usage(
+        tenant_id=principal.tenant_id,
+        model=cost_tracker.route_model("synthesis"),
+        prompt_tokens=estimated_prompt_tokens,
+        completion_tokens=estimated_completion_tokens,
     )
 
     citations = [

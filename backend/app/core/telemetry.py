@@ -40,6 +40,42 @@ PERMISSION_LEAK_DETECTIONS = Counter(
     ["tenant_id"],
 )
 
+TOKEN_USAGE_COUNTER = Counter(
+    "llm_token_usage_total",
+    "Total input and output tokens consumed across LLM providers and models",
+    ["tenant_id", "model", "token_type"],
+)
+
+ESTIMATED_COST_COUNTER = Counter(
+    "llm_estimated_cost_usd_total",
+    "Cumulative estimated financial cost in USD across LLM providers and models",
+    ["tenant_id", "model"],
+)
+
+CACHE_HITS_COUNTER = Counter(
+    "semantic_cache_hits_total",
+    "Total semantic cache hits by tenant",
+    ["tenant_id"],
+)
+
+CACHE_MISSES_COUNTER = Counter(
+    "semantic_cache_misses_total",
+    "Total semantic cache misses by tenant",
+    ["tenant_id"],
+)
+
+TOOL_CALL_COUNT = Counter(
+    "mcp_tool_calls_total",
+    "Total Model Context Protocol (MCP) tool invocations",
+    ["tenant_id", "tool_name", "risk_level", "status"],
+)
+
+RATE_LIMIT_EXCEEDED_COUNT = Counter(
+    "rate_limit_exceeded_total",
+    "Total number of requests rejected due to rate limit exhaustion",
+    ["tenant_id", "scope"],
+)
+
 
 def init_telemetry(settings: Settings | None = None) -> None:
     """Initialize OpenTelemetry tracers and exporters if enabled."""

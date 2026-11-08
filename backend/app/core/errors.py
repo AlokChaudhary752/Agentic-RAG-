@@ -145,6 +145,22 @@ class BudgetExceededError(AppException):
         )
 
 
+class RateLimitExceededError(AppException):
+    """Raised when user or tenant exceeds permitted request rate limits."""
+
+    def __init__(
+        self,
+        message: str = "Rate limit quota exceeded. Please retry after reset window.",
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            message=message,
+            code="RATE_LIMIT_EXCEEDED",
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            details=details,
+        )
+
+
 class ToolExecutionError(AppException):
     """Raised when an external MCP tool execution fails."""
 
