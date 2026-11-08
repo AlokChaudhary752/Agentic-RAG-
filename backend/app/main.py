@@ -34,6 +34,43 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         debug=settings.app_debug,
     )
     init_telemetry(settings)
+
+    # Initialize database schemas
+    try:
+        from app.db.session import init_db
+        await init_db()
+    except Exception as exc:
+        logger.warning("Database schema auto-init warning", error=str(exc))
+
+    # Auto-index sample corpus if available
+    try:
+        from pathlib import Path
+
+        corpus_path = Path(settings.sample_corpus_dir)
+        if corpus_path.exists():
+            from app.domain.models import DocumentChunk
+            from app.ingestion.chunkers.structure_chunker import StructureChunker
+            from app.ingestion.connectors.local_folder import LocalFolderConnector
+            from app.retrieval.qdrant_client import QdrantService
+
+            connector = LocalFolderConnector(folder_path=str(corpus_path))
+            chunker = StructureChunker()
+            all_chunks: list[DocumentChunk] = []
+
+            for file_path in corpus_path.rglob("*.md"):
+                try:
+                    doc = connector._build_raw_document(file_path)
+                    all_chunks.extend(chunker.chunk_document(doc))
+                except Exception:
+                    pass
+
+            if all_chunks:
+                qdrant = QdrantService(settings)
+                qdrant.upsert_chunks_sync(all_chunks)
+                logger.info("Indexed sample corpus into Qdrant", chunk_count=len(all_chunks))
+    except Exception as exc:
+        logger.warning("Could not auto-index sample corpus on startup", error=str(exc))
+
     yield
     logger.info("Shutting down Enterprise Knowledge Agent cleanly")
 

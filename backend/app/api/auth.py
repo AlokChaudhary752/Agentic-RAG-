@@ -23,6 +23,18 @@ class LoginRequest(BaseModel):
     password: str = Field(..., description="User password")
 
 
+class MintTokenRequest(BaseModel):
+    """Persona token request payload."""
+
+    user_id: str
+    email: EmailStr
+    full_name: str
+    roles: list[str] = Field(default_factory=lambda: ["employee"])
+    groups: list[str] = Field(default_factory=list)
+    clearance: str = "INTERNAL"
+    tenant_id: str = "tenant-nimbus-default"
+
+
 class TokenResponse(BaseModel):
     """JWT access token response."""
 
@@ -99,6 +111,38 @@ async def login(
 
     access_token = create_access_token(token_data)
 
+    return TokenResponse(
+        access_token=access_token,
+        token_type="bearer",
+        expires_in_minutes=settings.access_token_expire_minutes,
+        user=principal,
+    )
+
+
+@router.post("/token", response_model=TokenResponse)
+async def mint_persona_token(req: MintTokenRequest) -> TokenResponse:
+    """Issue a signed JWT access token for a pre-configured corporate persona."""
+    settings = get_settings()
+    principal = UserPrincipal(
+        user_id=req.user_id,
+        email=req.email,
+        full_name=req.full_name,
+        roles=req.roles,
+        groups=req.groups,
+        clearance=ClassificationLevel.from_str(req.clearance),
+        tenant_id=req.tenant_id,
+    )
+    token_data = {
+        "sub": principal.user_id,
+        "user_id": principal.user_id,
+        "email": principal.email,
+        "full_name": principal.full_name,
+        "roles": principal.roles,
+        "groups": principal.groups,
+        "clearance": principal.clearance.value,
+        "tenant_id": principal.tenant_id,
+    }
+    access_token = create_access_token(token_data)
     return TokenResponse(
         access_token=access_token,
         token_type="bearer",
