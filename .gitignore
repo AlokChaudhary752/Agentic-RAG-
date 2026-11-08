@@ -38,6 +38,7 @@ htmlcov/
 
 # Environment Variables & Secrets
 .env
+.env.local
 *.local.env
 
 # Database & Storage
