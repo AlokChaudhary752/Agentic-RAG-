@@ -99,8 +99,8 @@ class QdrantService:
         norm = math.sqrt(sum(v * v for v in vec)) or 1.0
         return [v / norm for v in vec]
 
-    async def upsert_chunks(self, chunks: list[DocumentChunk]) -> int:
-        """Upsert a batch of document chunks with vectors and ACL metadata into Qdrant."""
+    def upsert_chunks_sync(self, chunks: list[DocumentChunk]) -> int:
+        """Synchronously upsert a batch of document chunks with vectors and ACL metadata into Qdrant."""
         if not chunks:
             return 0
 
@@ -157,6 +157,10 @@ class QdrantService:
         )
         return len(points)
 
+    async def upsert_chunks(self, chunks: list[DocumentChunk]) -> int:
+        """Upsert a batch of document chunks with vectors and ACL metadata into Qdrant."""
+        return self.upsert_chunks_sync(chunks)
+
     def delete_by_doc_id(self, doc_id: str) -> None:
         """Purge all chunks associated with a document ID from Qdrant."""
         self.client.delete(
@@ -181,7 +185,7 @@ class QdrantService:
             from app.domain.models import ClassificationLevel
 
             lvl = ClassificationLevel[level]
-            if principal.clearance.is_accessible_by(lvl):
+            if lvl.is_accessible_by(principal.clearance):
                 allowed_classifications.append(level)
 
         classification_condition = qmodels.FieldCondition(

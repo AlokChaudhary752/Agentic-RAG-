@@ -1,5 +1,6 @@
 """Chat completions endpoint with streaming and stateful multi-step agent orchestration."""
 
+import asyncio
 import json
 import uuid
 from collections.abc import AsyncGenerator
@@ -93,8 +94,10 @@ async def chat_completions(
 
         return StreamingResponse(event_generator(), media_type="text/event-stream")
 
-    # Synchronous graph execution
-    final_state: dict[str, Any] = dict(graph.invoke(initial_state, config=config))
+    # Execute graph off the event loop thread to prevent event loop blocking
+    final_state: dict[str, Any] = dict(
+        await asyncio.to_thread(graph.invoke, initial_state, config=config)
+    )
 
     citations = [
         CitationPayload(

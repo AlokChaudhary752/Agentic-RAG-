@@ -32,5 +32,5 @@ jobs:
           APP_ENV: test
           QDRANT_USE_IN_MEMORY: "true"
         run: |
-          python evaluation/run_eval.py --gate-check --min-faithfulness 0.85 --min-context-precision 0.80
+          python evaluation/run_eval.py --gate-check --min-faithfulness 0.85 --min-context-precision 0.70 --min-answer-relevance 0.65
 

@@ -26,8 +26,13 @@ def test_settings() -> Settings:
 
 
 @pytest.fixture(autouse=True)
-def override_settings(test_settings: Settings) -> None:
-    """Apply test settings to the lru_cache."""
+def override_settings(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Ensure test environment is set across all settings instances."""
+    monkeypatch.setenv("APP_ENV", "test")
+    monkeypatch.setenv("QDRANT_USE_IN_MEMORY", "true")
+    monkeypatch.setenv("OTEL_ENABLED", "false")
+    monkeypatch.setenv("LANGFUSE_ENABLED", "false")
+    monkeypatch.setenv("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
     get_settings.cache_clear()
 
 

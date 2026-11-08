@@ -100,6 +100,16 @@ class LLMService:
         conflict_notices: list[str] | None = None,
     ) -> tuple[str, list[dict[str, Any]], float]:
         """Synthesize factual answer strictly grounded in retrieved chunks with citations."""
+        # Filter chunks by query relevance to prevent hallucinating from unrelated nearest neighbors
+        query_terms = set(re.findall(r"\w+", query.lower())) - {
+            "what", "is", "the", "for", "and", "in", "of", "to", "how", "a", "an", "does", "do", "are", "at"
+        }
+        if query_terms and chunks:
+            relevant_chunks = [
+                c for c in chunks if query_terms.intersection(set(re.findall(r"\w+", c.content.lower())))
+            ]
+            chunks = relevant_chunks
+
         if not chunks:
             return (
                 "I do not have sufficient information in the authorized enterprise documents "
@@ -117,7 +127,7 @@ class LLMService:
                 answer_paragraphs.append(f"**Notice on Document Versions**: {notice}")
 
         # 2. Extract facts from most authoritative chunks
-        for _i, chunk in enumerate(chunks[:3], 1):
+        for chunk in chunks[:3]:
             citation_marker = f"[{chunk.title}, {chunk.section_path or 'General'}]"
             citations.append(
                 {
@@ -128,9 +138,12 @@ class LLMService:
                     "source_url": chunk.source_url,
                 }
             )
-            # Use concise factual sentence from chunk
-            clean_content = chunk.content.strip().split("\n")[0]
-            answer_paragraphs.append(f"{clean_content} {citation_marker}")
+            # Extract substantive text and table lines from chunk
+            lines = [line.strip() for line in chunk.content.split("\n") if line.strip()]
+            substantive = [line for line in lines if not line.startswith("#")]
+            snippet = " ".join(substantive[:4]) if substantive else (lines[0] if lines else "")
+            if snippet:
+                answer_paragraphs.append(f"{snippet} {citation_marker}")
 
         final_answer = "\n\n".join(answer_paragraphs)
         confidence = 0.95 if chunks[0].authority_score >= 0.8 else 0.75
