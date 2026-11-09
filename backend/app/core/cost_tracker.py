@@ -112,3 +112,4 @@ def get_cost_tracker() -> CostTracker:
     if _cost_tracker is None:
         _cost_tracker = CostTracker()
     return _cost_tracker
+

@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from app.agent.graph import create_agent_graph
+from app.agent.graph import get_agent_graph
 from app.agent.state import AgentState
 from app.core.cost_tracker import get_cost_tracker
 from app.core.rate_limit import verify_rate_limit
@@ -65,7 +65,7 @@ async def chat_completions(
     """Execute stateful agent pipeline over authorized knowledge base with rate limiting and telemetry."""
     start_time = time.perf_counter()
     thread_id = req.thread_id or str(uuid.uuid4())
-    graph: Any = create_agent_graph()
+    graph: Any = get_agent_graph()
 
     # Apply rate limit headers to response
     rl_headers = getattr(request.state, "rate_limit_headers", {})

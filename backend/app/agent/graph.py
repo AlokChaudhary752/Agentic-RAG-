@@ -97,3 +97,23 @@ def create_agent_graph(
         checkpointer=memory_saver,
         interrupt_before=interrupt_nodes,
     )
+
+
+_shared_graph: Any | None = None
+
+
+def get_agent_graph(
+    executor: AgentNodeExecutor | None = None,
+    checkpointer: Any | None = None,
+) -> Any:
+    """Get or lazily initialize the shared compiled agent graph with indexed corpus."""
+    global _shared_graph
+    if _shared_graph is None or executor is not None:
+        exec_instance = executor or AgentNodeExecutor()
+        exec_instance.ensure_corpus_indexed()
+        _shared_graph = create_agent_graph(
+            executor=exec_instance,
+            checkpointer=checkpointer,
+        )
+    return _shared_graph
+

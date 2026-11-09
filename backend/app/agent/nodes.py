@@ -35,6 +35,42 @@ class AgentNodeExecutor:
         self.transformer = query_transformer or QueryTransformer()
         self.mcp_client = mcp_client or get_mcp_client()
 
+    def ensure_corpus_indexed(self, corpus_dir: Any = None) -> None:
+        """Index sample corpus into Qdrant and BM25 if not already populated."""
+        from pathlib import Path
+        path = Path(corpus_dir or "data/sample_corpus")
+        if not path.exists():
+            return
+
+        qdrant = self.retriever.qdrant
+        needs_index = True
+        try:
+            info = qdrant.client.get_collection(qdrant.collection_name)
+            if info.points_count and info.points_count > 10:
+                needs_index = False
+        except Exception:
+            needs_index = True
+
+        if needs_index:
+            from app.domain.models import DocumentChunk
+            from app.ingestion.chunkers.structure_chunker import StructureChunker
+            from app.ingestion.connectors.local_folder import LocalFolderConnector
+
+            connector = LocalFolderConnector(folder_path=str(path))
+            chunker = StructureChunker()
+            all_chunks: list[DocumentChunk] = []
+            for file_path in path.rglob("*.md"):
+                try:
+                    doc = connector._build_raw_document(file_path)
+                    all_chunks.extend(chunker.chunk_document(doc))
+                except Exception:
+                    pass
+
+            if all_chunks:
+                qdrant.upsert_chunks_sync(all_chunks)
+                self.retriever.index_corpus_for_sparse_search(all_chunks)
+                logger.info("Indexed sample corpus into Qdrant & BM25", chunk_count=len(all_chunks))
+
     def understand(self, state: AgentState) -> dict[str, Any]:
         """Classify user query intent into factual_lookup, multi_hop, action_request, or chit_chat."""
         query = state.get("query") or (state.get("messages", [{}])[-1].get("content", ""))

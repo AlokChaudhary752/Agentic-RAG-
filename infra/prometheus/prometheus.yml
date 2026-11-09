@@ -10,3 +10,4 @@ scrape_configs:
         labels:
           environment: "production"
           service: "enterprise-knowledge-backend"
+
