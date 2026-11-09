@@ -24,7 +24,7 @@ This document records empirical evaluation results comparing the **Enterprise Kn
 | **Permission Leak Rate** | **0.00%** | 80.00% (CRITICAL) | **0.00% (Guaranteed)** | **Zero Leaks (Secure)** |
 | **Conflict Resolution Accuracy** | >= 0.85 | 95.00% | **93.33%** | **+-1.7%** |
 | **Abstention Accuracy** | >= 0.85 | 66.67% | **80.00%** | **+13.3%** |
-| **Latency (p50 / p95)** | < 2500ms | 1.2ms / 2.7ms | 33.1ms / 41.4ms | Governed Multi-step |
+| **Latency (p50 / p95)** | < 2500ms | 0.8ms / 0.9ms | 20.0ms / 20.8ms | Governed Multi-step |
 
 ---
 

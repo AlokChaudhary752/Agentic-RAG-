@@ -1,6 +1,5 @@
 """Generates synthetic enterprise corpus for Nimbus Technologies (65+ documents)."""
 
-import os
 from pathlib import Path
 
 CORPUS_ROOT = Path("data/sample_corpus")

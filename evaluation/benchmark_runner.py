@@ -5,12 +5,21 @@ across all RAGAS metrics and security gates, and generates the benchmark report.
 """
 
 import json
+import sys
 import time
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, Field
+
+# Ensure root and backend directories are in sys.path for direct invocation
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+BACKEND_DIR = ROOT_DIR / "backend"
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
 from app.agent.graph import create_agent_graph
 from app.agent.nodes import AgentNodeExecutor

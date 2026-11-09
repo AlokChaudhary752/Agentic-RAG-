@@ -1,6 +1,17 @@
 """Seed database with users, groups, and run initial corpus ingestion."""
 
 import asyncio
+import sys
+from pathlib import Path
+
+# Ensure root and backend directories are in sys.path for direct invocation
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+BACKEND_DIR = ROOT_DIR / "backend"
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
+
 from app.db.repositories.user_repo import UserRepository
 from app.db.session import get_session_context, init_db
 from app.ingestion.connectors.local_folder import LocalFolderConnector

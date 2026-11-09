@@ -11,7 +11,17 @@ Implements rigorous, mathematically defined metrics:
 """
 
 import re
+import sys
+from pathlib import Path
 from typing import Any
+
+# Ensure root and backend directories are in sys.path
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+BACKEND_DIR = ROOT_DIR / "backend"
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
 from pydantic import BaseModel, Field
 

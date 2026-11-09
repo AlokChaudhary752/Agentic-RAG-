@@ -9,10 +9,10 @@ Demonstrates the 3 core platform differentiators:
 import argparse
 import sys
 import time
-from typing import Any
 
 # Ensure backend directory is in path
 from pathlib import Path
+from typing import Any
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 BACKEND_DIR = ROOT_DIR / "backend"
@@ -20,6 +20,7 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 import httpx
+
 
 # ANSI terminal formatting
 class Style:
@@ -67,6 +68,7 @@ def get_client() -> tuple[Any, str]:
 
     print(f"  {Style.YELLOW}Running in-process using direct FastAPI TestClient engine...{Style.RESET}")
     from fastapi.testclient import TestClient
+
     from app.main import app
 
     return TestClient(app), "in_process"
@@ -169,7 +171,7 @@ def demo_scenario_1_permission_isolation(client: Any, interactive: bool) -> None
 
     print(f"\n  {Style.BOLD}Agent Response to Bob:{Style.RESET}")
     print(f"  {Style.GREEN}{res_bob['answer']}{Style.RESET}")
-    print(f"\n  Verified Citations:")
+    print("\n  Verified Citations:")
     for cit in res_bob["citations"]:
         print(f"    - [{cit['doc_id']}] {cit['title']} ({cit['section_path']})")
     print(f"  Confidence: {res_bob['confidence']}")
@@ -201,7 +203,7 @@ def demo_scenario_2_conflict_resolution(client: Any, interactive: bool) -> None:
         for notice in res["conflict_notices"]:
             print(f"    [!] {notice}")
 
-    print(f"\n  Citations:")
+    print("\n  Citations:")
     for cit in res.get("citations", []):
         print(f"    - [{cit['doc_id']}] {cit['title']}")
     print(f"  Latency: {dt:.2f}s")

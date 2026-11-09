@@ -5,9 +5,19 @@ vector ACL pre-filtering, query expansion, hybrid fusion, reranking,
 or claim-level verification. Kept permanently for ablation benchmarking.
 """
 
+import sys
+from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, Field
+
+# Ensure root and backend directories are in sys.path
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+BACKEND_DIR = ROOT_DIR / "backend"
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
 from app.core.config import Settings, get_settings
 from app.retrieval.qdrant_client import QdrantService

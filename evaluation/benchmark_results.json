@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-08T03:23:13.014317+00:00",
+  "timestamp": "2026-11-09T02:18:45.581795+00:00",
   "agent_summary": {
     "system_name": "Enterprise Knowledge Agent (Agentic RAG)",
     "total_queries": 15,
@@ -10,8 +10,8 @@
     "permission_leak_rate_percent": 0.0,
     "conflict_resolution_accuracy_percent": 93.33,
     "abstention_accuracy_percent": 80.0,
-    "p50_latency_ms": 33.09,
-    "p95_latency_ms": 41.44
+    "p50_latency_ms": 20.0,
+    "p95_latency_ms": 20.75
   },
   "baseline_summary": {
     "system_name": "Naive RAG Baseline (Un-governed)",
@@ -23,8 +23,8 @@
     "permission_leak_rate_percent": 80.0,
     "conflict_resolution_accuracy_percent": 95.0,
     "abstention_accuracy_percent": 66.67,
-    "p50_latency_ms": 1.25,
-    "p95_latency_ms": 2.68
+    "p50_latency_ms": 0.82,
+    "p95_latency_ms": 0.92
   },
   "test_case_results": [
     {
@@ -42,7 +42,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 28.152899991255254
+          "latency_ms": 19.82819999102503
         }
       },
       "baseline": {
@@ -56,7 +56,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 1.4128999901004136
+          "latency_ms": 0.9195000166073442
         }
       }
     },
@@ -75,7 +75,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 33.54400000534952
+          "latency_ms": 20.646799996029586
         }
       },
       "baseline": {
@@ -89,7 +89,7 @@
           "permission_leak": true,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 1.1402000091038644
+          "latency_ms": 0.8486000006087124
         }
       }
     },
@@ -108,7 +108,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 33.443499996792525
+          "latency_ms": 20.75139997759834
         }
       },
       "baseline": {
@@ -122,7 +122,7 @@
           "permission_leak": true,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 1.455899968277663
+          "latency_ms": 0.8325999951921403
         }
       }
     },
@@ -141,7 +141,7 @@
           "permission_leak": false,
           "conflict_accuracy": 0.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 22.556299983989447
+          "latency_ms": 12.553200009278953
         }
       },
       "baseline": {
@@ -155,7 +155,7 @@
           "permission_leak": true,
           "conflict_accuracy": 0.25,
           "abstention_accuracy": 1.0,
-          "latency_ms": 1.248900021892041
+          "latency_ms": 0.784000032581389
         }
       }
     },
@@ -174,7 +174,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 31.674800033215433
+          "latency_ms": 20.00160003080964
         }
       },
       "baseline": {
@@ -188,7 +188,7 @@
           "permission_leak": true,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 0.0,
-          "latency_ms": 1.2453999952413142
+          "latency_ms": 0.797600019723177
         }
       }
     },
@@ -207,7 +207,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 24.43900000071153
+          "latency_ms": 13.418000016827136
         }
       },
       "baseline": {
@@ -221,7 +221,7 @@
           "permission_leak": true,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 1.5557000297121704
+          "latency_ms": 0.819200009573251
         }
       }
     },
@@ -240,7 +240,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 0.0,
-          "latency_ms": 34.95659999316558
+          "latency_ms": 19.445299985818565
         }
       },
       "baseline": {
@@ -254,7 +254,7 @@
           "permission_leak": true,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 0.0,
-          "latency_ms": 1.3562000240199268
+          "latency_ms": 0.8010000456124544
         }
       }
     },
@@ -273,7 +273,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 22.588300053030252
+          "latency_ms": 13.69890000205487
         }
       },
       "baseline": {
@@ -287,7 +287,7 @@
           "permission_leak": true,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 1.1502999695949256
+          "latency_ms": 0.7569000008516014
         }
       }
     },
@@ -306,7 +306,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 41.442800022196025
+          "latency_ms": 20.33359999768436
         }
       },
       "baseline": {
@@ -320,7 +320,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 1.3126999838277698
+          "latency_ms": 0.8687000372447073
         }
       }
     },
@@ -339,7 +339,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 38.04269997635856
+          "latency_ms": 20.088399993255734
         }
       },
       "baseline": {
@@ -353,7 +353,7 @@
           "permission_leak": true,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 0.0,
-          "latency_ms": 1.1531999916769564
+          "latency_ms": 0.8234999841079116
         }
       }
     },
@@ -372,7 +372,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 0.0,
-          "latency_ms": 31.632700003683567
+          "latency_ms": 19.842199981212616
         }
       },
       "baseline": {
@@ -386,7 +386,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 0.0,
-          "latency_ms": 1.1513999779708683
+          "latency_ms": 0.8016999927349389
         }
       }
     },
@@ -405,7 +405,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 0.0,
-          "latency_ms": 33.08870003093034
+          "latency_ms": 20.62109997496009
         }
       },
       "baseline": {
@@ -419,7 +419,7 @@
           "permission_leak": true,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 0.0,
-          "latency_ms": 1.1845999979414046
+          "latency_ms": 0.8378999773412943
         }
       }
     },
@@ -438,7 +438,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 24.859299999661744
+          "latency_ms": 13.0071000312455
         }
       },
       "baseline": {
@@ -452,7 +452,7 @@
           "permission_leak": true,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 2.682099991943687
+          "latency_ms": 0.7302999729290605
         }
       }
     },
@@ -471,7 +471,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 35.77809996204451
+          "latency_ms": 20.003800047561526
         }
       },
       "baseline": {
@@ -485,7 +485,7 @@
           "permission_leak": true,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 1.2172000133432448
+          "latency_ms": 0.8304999792017043
         }
       }
     },
@@ -504,7 +504,7 @@
           "permission_leak": false,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 36.80179995717481
+          "latency_ms": 20.299899973906577
         }
       },
       "baseline": {
@@ -518,7 +518,7 @@
           "permission_leak": true,
           "conflict_accuracy": 1.0,
           "abstention_accuracy": 1.0,
-          "latency_ms": 1.2222999939695
+          "latency_ms": 0.8450999739579856
         }
       }
     }
