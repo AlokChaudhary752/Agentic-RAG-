@@ -49,7 +49,9 @@ async def get_current_principal(
 ) -> UserPrincipal:
     """FastAPI dependency to extract and validate UserPrincipal from Authorization Bearer token."""
     if not authorization or not authorization.startswith("Bearer "):
-        raise UnauthorizedError("Missing or invalid Authorization header. Expected 'Bearer <token>'")
+        raise UnauthorizedError(
+            "Missing or invalid Authorization header. Expected 'Bearer <token>'"
+        )
 
     token = authorization.split("Bearer ", 1)[1].strip()
     payload = decode_access_token(token)

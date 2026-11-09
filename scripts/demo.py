@@ -66,7 +66,9 @@ def get_client() -> tuple[Any, str]:
     except Exception:
         pass
 
-    print(f"  {Style.YELLOW}Running in-process using direct FastAPI TestClient engine...{Style.RESET}")
+    print(
+        f"  {Style.YELLOW}Running in-process using direct FastAPI TestClient engine...{Style.RESET}"
+    )
     from fastapi.testclient import TestClient
 
     from app.main import app
@@ -137,9 +139,13 @@ def demo_scenario_1_permission_isolation(client: Any, interactive: bool) -> None
     # 1. Alice (Internal clearance)
     token_alice = mint_token(client, ALICE)
     print(f"\n  [1.1] User: {Style.BOLD}{ALICE['full_name']}{Style.RESET}")
-    print(f"        Role: {ALICE['roles'][0]} | Clearance: {Style.YELLOW}{ALICE['clearance']}{Style.RESET}")
-    print(f"        Query: \"{Style.CYAN}{query}{Style.RESET}\"")
-    print(f"        {Style.DIM}Executing retrieval with vector-level ACL pre-filter...{Style.RESET}")
+    print(
+        f"        Role: {ALICE['roles'][0]} | Clearance: {Style.YELLOW}{ALICE['clearance']}{Style.RESET}"
+    )
+    print(f'        Query: "{Style.CYAN}{query}{Style.RESET}"')
+    print(
+        f"        {Style.DIM}Executing retrieval with vector-level ACL pre-filter...{Style.RESET}"
+    )
 
     t0 = time.perf_counter()
     res_alice = run_chat(client, token_alice, query)
@@ -153,7 +159,9 @@ def demo_scenario_1_permission_isolation(client: Any, interactive: bool) -> None
 
     # Verification assertion
     assert "HR-SAL" not in res_alice["answer"], "LEAK DETECTED: Salary doc in answer!"
-    print(f"  {Style.GREEN}[PASSED] ZERO LEAK: Alice was refused access to confidential compensation data.{Style.RESET}")
+    print(
+        f"  {Style.GREEN}[PASSED] ZERO LEAK: Alice was refused access to confidential compensation data.{Style.RESET}"
+    )
 
     if interactive:
         input(f"\n{Style.DIM}Press Enter to run the same query as Bob (Manager)...{Style.RESET}")
@@ -161,8 +169,10 @@ def demo_scenario_1_permission_isolation(client: Any, interactive: bool) -> None
     # 2. Bob (Confidential clearance)
     token_bob = mint_token(client, BOB)
     print(f"\n  [1.2] User: {Style.BOLD}{BOB['full_name']}{Style.RESET}")
-    print(f"        Role: {BOB['roles'][0]} | Clearance: {Style.GREEN}{BOB['clearance']}{Style.RESET}")
-    print(f"        Query: \"{Style.CYAN}{query}{Style.RESET}\"")
+    print(
+        f"        Role: {BOB['roles'][0]} | Clearance: {Style.GREEN}{BOB['clearance']}{Style.RESET}"
+    )
+    print(f'        Query: "{Style.CYAN}{query}{Style.RESET}"')
     print(f"        {Style.DIM}Executing retrieval with authorized ACL pre-filter...{Style.RESET}")
 
     t0 = time.perf_counter()
@@ -176,7 +186,9 @@ def demo_scenario_1_permission_isolation(client: Any, interactive: bool) -> None
         print(f"    - [{cit['doc_id']}] {cit['title']} ({cit['section_path']})")
     print(f"  Confidence: {res_bob['confidence']}")
     print(f"  Latency: {dt_bob:.2f}s")
-    print(f"  {Style.GREEN}[PASSED] AUTHORIZED: Bob received authorized salary bands with verified citations.{Style.RESET}")
+    print(
+        f"  {Style.GREEN}[PASSED] AUTHORIZED: Bob received authorized salary bands with verified citations.{Style.RESET}"
+    )
 
 
 def demo_scenario_2_conflict_resolution(client: Any, interactive: bool) -> None:
@@ -188,8 +200,12 @@ def demo_scenario_2_conflict_resolution(client: Any, interactive: bool) -> None:
     query = "What is our company's approved daily travel meal per diem rate?"
     token_alice = mint_token(client, ALICE)
 
-    print(f"\n  User: {Style.BOLD}{ALICE['full_name']}{Style.RESET} | Query: \"{Style.CYAN}{query}{Style.RESET}\"")
-    print(f"  {Style.DIM}Detecting knowledge conflicts between fin-travel-policy-2024 ($75) and fin-travel-policy-2026 ($125)...{Style.RESET}")
+    print(
+        f'\n  User: {Style.BOLD}{ALICE["full_name"]}{Style.RESET} | Query: "{Style.CYAN}{query}{Style.RESET}"'
+    )
+    print(
+        f"  {Style.DIM}Detecting knowledge conflicts between fin-travel-policy-2024 ($75) and fin-travel-policy-2026 ($125)...{Style.RESET}"
+    )
 
     t0 = time.perf_counter()
     res = run_chat(client, token_alice, query)
@@ -214,7 +230,9 @@ def demo_scenario_2_conflict_resolution(client: Any, interactive: bool) -> None:
         or cit["doc_id"] == "fin-travel-policy-2026"
         for cit in res.get("citations", [])
     ), "Expected 2026 approved rate ($125/day)!"
-    print(f"  {Style.GREEN}[PASSED] CONFLICT RESOLVED: Agent preferred approved 2026 policy over superseded 2024 policy.{Style.RESET}")
+    print(
+        f"  {Style.GREEN}[PASSED] CONFLICT RESOLVED: Agent preferred approved 2026 policy over superseded 2024 policy.{Style.RESET}"
+    )
 
 
 def demo_scenario_3_human_in_the_loop_mcp(client: Any, interactive: bool) -> None:
@@ -228,27 +246,39 @@ def demo_scenario_3_human_in_the_loop_mcp(client: Any, interactive: bool) -> Non
 
     # Step 1: Initial request (should pause for approval)
     print(f"\n  [3.1] Initial Request from {Style.BOLD}{BOB['full_name']}{Style.RESET}:")
-    print(f"        Query: \"{Style.CYAN}{query}{Style.RESET}\"")
+    print(f'        Query: "{Style.CYAN}{query}{Style.RESET}"')
     print(f"        {Style.DIM}Evaluating intent and tool risk classification...{Style.RESET}")
 
     res_1 = run_chat(client, token_bob, query)
     thread_id = res_1["thread_id"]
 
     print(f"\n  Status: {Style.YELLOW}{Style.BOLD}APPROVAL REQUIRED{Style.RESET}")
-    print(f"  Tool Target: {Style.BOLD}create_jira_ticket{Style.RESET} (Risk Level: {Style.RED}write_high{Style.RESET})")
+    print(
+        f"  Tool Target: {Style.BOLD}create_jira_ticket{Style.RESET} (Risk Level: {Style.RED}write_high{Style.RESET})"
+    )
     print(f"  Thread ID: {thread_id}")
     print(f"  Steps Executed: {' -> '.join(res_1['steps_executed'])}")
     print(f"  Agent Guidance: {res_1['answer']}")
 
     assert res_1.get("approval_required") is True, "Expected approval_required to be True!"
-    print(f"  {Style.GREEN}[PASSED] SAFETY GATE: Agent halted execution and requested human approval.{Style.RESET}")
+    print(
+        f"  {Style.GREEN}[PASSED] SAFETY GATE: Agent halted execution and requested human approval.{Style.RESET}"
+    )
 
     if interactive:
-        user_choice = input(f"\n{Style.BOLD}Simulate Human Decision: [A]pprove or [R]eject? (Default: A): {Style.RESET}").strip().lower()
+        user_choice = (
+            input(
+                f"\n{Style.BOLD}Simulate Human Decision: [A]pprove or [R]eject? (Default: A): {Style.RESET}"
+            )
+            .strip()
+            .lower()
+        )
         granted = user_choice != "r"
     else:
         granted = True
-        print(f"\n  {Style.DIM}[Auto-Mode] Simulating operator approving ticket creation...{Style.RESET}")
+        print(
+            f"\n  {Style.DIM}[Auto-Mode] Simulating operator approving ticket creation...{Style.RESET}"
+        )
 
     # Step 2: Resume with decision
     print(f"\n  [3.2] Resuming Thread {thread_id} with approval_granted={granted}...")
@@ -261,9 +291,13 @@ def demo_scenario_3_human_in_the_loop_mcp(client: Any, interactive: bool) -> Non
 
     if granted:
         assert "NIMBUS-" in res_2["answer"], "Expected created ticket ID in response!"
-        print(f"  {Style.GREEN}[PASSED] MCP EXECUTION: Tool executed safely upon verified human authorization.{Style.RESET}")
+        print(
+            f"  {Style.GREEN}[PASSED] MCP EXECUTION: Tool executed safely upon verified human authorization.{Style.RESET}"
+        )
     else:
-        print(f"  {Style.YELLOW}[PASSED] REJECTION RECORDED: Tool execution safely aborted.{Style.RESET}")
+        print(
+            f"  {Style.YELLOW}[PASSED] REJECTION RECORDED: Tool execution safely aborted.{Style.RESET}"
+        )
 
 
 def print_summary() -> None:

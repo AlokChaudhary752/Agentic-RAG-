@@ -33,7 +33,10 @@ class QueryTransformer:
         """Resolve pronouns and append enterprise context if missing."""
         cleaned = query.strip()
         # If query has vague references like 'it', 'the policy', 'they', inject company context
-        if re.search(r"\b(it|its|their|the policy|the company|here)\b", cleaned, re.IGNORECASE) and "nimbus" not in cleaned.lower():
+        if (
+            re.search(r"\b(it|its|their|the policy|the company|here)\b", cleaned, re.IGNORECASE)
+            and "nimbus" not in cleaned.lower()
+        ):
             cleaned = f"Nimbus Technologies {cleaned}"
         return cleaned
 

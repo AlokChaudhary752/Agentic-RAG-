@@ -116,4 +116,3 @@ def get_agent_graph(
             checkpointer=checkpointer,
         )
     return _shared_graph
-

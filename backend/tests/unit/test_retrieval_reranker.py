@@ -99,4 +99,3 @@ def test_reranker_relevance_ranking() -> None:
     assert len(results) == 2
     assert results[0].chunk.id == "c_rel"
     assert results[0].cross_score > results[1].cross_score
-

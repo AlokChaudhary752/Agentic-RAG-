@@ -25,9 +25,15 @@ class ConflictNotice(BaseModel):
 class ConflictResolutionResult(BaseModel):
     """Result of cross-document conflict analysis and re-ranking."""
 
-    resolved_chunks: list[DocumentChunk] = Field(..., description="Re-ordered chunks favoring authority")
-    notices: list[ConflictNotice] = Field(default_factory=list, description="Explicit conflict notices")
-    has_conflicts: bool = Field(default=False, description="Whether conflicting versions were detected")
+    resolved_chunks: list[DocumentChunk] = Field(
+        ..., description="Re-ordered chunks favoring authority"
+    )
+    notices: list[ConflictNotice] = Field(
+        default_factory=list, description="Explicit conflict notices"
+    )
+    has_conflicts: bool = Field(
+        default=False, description="Whether conflicting versions were detected"
+    )
 
 
 class ConflictResolver:

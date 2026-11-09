@@ -45,6 +45,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Initialize database schemas
     try:
         from app.db.session import init_db
+
         await init_db()
     except Exception as exc:
         logger.warning("Database schema auto-init warning", error=str(exc))

@@ -36,7 +36,9 @@ def test_faithfulness_calculation(evaluator: RagasMetricsEvaluator) -> None:
     assert score >= 0.8
 
     # 2. Hallucinated answer (claims not in context)
-    hallucinated = "Employees receive 60 days of vacation and a company sports car for personal travel."
+    hallucinated = (
+        "Employees receive 60 days of vacation and a company sports car for personal travel."
+    )
     hallucinated_score = evaluator.calculate_faithfulness(hallucinated, context)
     assert hallucinated_score < 0.5
 
@@ -60,7 +62,9 @@ def test_answer_relevance_calculation(evaluator: RagasMetricsEvaluator) -> None:
 
     # Truthful expected refusal
     refusal = "I do not have sufficient information in authorized documents."
-    assert evaluator.calculate_answer_relevance(query, refusal, keywords, expected_refusal=True) == 1.0
+    assert (
+        evaluator.calculate_answer_relevance(query, refusal, keywords, expected_refusal=True) == 1.0
+    )
 
 
 def test_context_precision_calculation(evaluator: RagasMetricsEvaluator) -> None:
@@ -76,10 +80,16 @@ def test_context_precision_calculation(evaluator: RagasMetricsEvaluator) -> None
     assert 0.0 < prec_late < 1.0
 
     # Zero relevant chunks
-    assert evaluator.calculate_context_precision(["it-acceptable-use"], ["hr-leave-policy-2026"]) == 0.0
+    assert (
+        evaluator.calculate_context_precision(["it-acceptable-use"], ["hr-leave-policy-2026"])
+        == 0.0
+    )
 
     # Expected refusal: no docs retrieved -> perfect precision
-    assert evaluator.calculate_context_precision([], ["fin-salary-bands"], expected_refusal=True) == 1.0
+    assert (
+        evaluator.calculate_context_precision([], ["fin-salary-bands"], expected_refusal=True)
+        == 1.0
+    )
 
 
 def test_context_recall_calculation(evaluator: RagasMetricsEvaluator) -> None:
@@ -148,12 +158,22 @@ def test_permission_leak_detection(
 def test_conflict_and_abstention_accuracy(evaluator: RagasMetricsEvaluator) -> None:
     # Conflict accuracy
     answer_with_notice = "**Notice on Document Versions**: Policy 2024 is deprecated. Meal per diem is $125 approved."
-    assert evaluator.calculate_conflict_accuracy(answer_with_notice, ["notice"], expected_conflict=True) == 1.0
+    assert (
+        evaluator.calculate_conflict_accuracy(
+            answer_with_notice, ["notice"], expected_conflict=True
+        )
+        == 1.0
+    )
 
     # Abstention accuracy
     refusal_answer = "I do not have sufficient information in the authorized enterprise documents."
     assert evaluator.calculate_abstention_accuracy(refusal_answer, expected_refusal=True) == 1.0
-    assert evaluator.calculate_abstention_accuracy("Here is the secret recipe: butter and sugar", expected_refusal=True) == 0.0
+    assert (
+        evaluator.calculate_abstention_accuracy(
+            "Here is the secret recipe: butter and sugar", expected_refusal=True
+        )
+        == 0.0
+    )
 
 
 def test_golden_dataset_loading() -> None:

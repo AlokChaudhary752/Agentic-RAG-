@@ -56,4 +56,3 @@ async def test_chat_completions_streaming_sse(alice_auth_header: dict[str, str])
         body = res.text
         assert "data: " in body
         assert "[DONE]" in body
-

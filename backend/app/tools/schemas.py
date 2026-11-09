@@ -141,4 +141,3 @@ class ToolCallResult(BaseModel):
     error: str | None = None
     execution_time_ms: float = 0.0
     idempotency_key: str | None = None
-

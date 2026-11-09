@@ -125,9 +125,7 @@ class Settings(BaseSettings):
     mcp_server_port: int = Field(default=8005, description="MCP server port")
 
     # Budgets & Limits
-    rate_limit_enabled: bool = Field(
-        default=True, description="Enable request rate limiting"
-    )
+    rate_limit_enabled: bool = Field(default=True, description="Enable request rate limiting")
     rate_limit_requests_per_minute: int = Field(
         default=60, description="Max allowed requests per user per minute"
     )

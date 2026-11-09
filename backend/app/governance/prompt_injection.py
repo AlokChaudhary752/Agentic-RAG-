@@ -22,9 +22,7 @@ INJECTION_PATTERNS = [
     re.compile(
         r"(?i)\b(?:exfiltrate|send|leak|forward)\s+(?:passwords|secrets|api\s*keys|tokens|credentials|database)\b"
     ),
-    re.compile(
-        r"(?i)(?:<system>|<instruction>|\[system\]|\[instruction\]|system:\s*you\s*are)"
-    ),
+    re.compile(r"(?i)(?:<system>|<instruction>|\[system\]|\[instruction\]|system:\s*you\s*are)"),
     re.compile(
         r"(?i)\b(?:do\s+not\s+follow|bypass)\s+(?:safety|permission|content\s+filter|guidelines)\b"
     ),
@@ -48,7 +46,9 @@ class InjectionScanResult(BaseModel):
     risk_score: float = Field(
         default=0.0, ge=0.0, le=1.0, description="Assessed adversarial risk score"
     )
-    sanitized_text: str = Field(..., description="Cleaned text with suspicious instructions defanged")
+    sanitized_text: str = Field(
+        ..., description="Cleaned text with suspicious instructions defanged"
+    )
 
 
 class PromptInjectionDefense:
@@ -87,9 +87,7 @@ class PromptInjectionDefense:
                 risk_score=risk_score,
             )
             if self.strict_mode:
-                raise PromptInjectionError(
-                    f"Prompt injection signature detected: {matched[0]}"
-                )
+                raise PromptInjectionError(f"Prompt injection signature detected: {matched[0]}")
 
         return InjectionScanResult(
             is_injected=is_injected,
@@ -119,7 +117,9 @@ class PromptInjectionDefense:
         for i, chunk in enumerate(chunks, 1):
             sanitized = self.sanitize_text(chunk.content)
             # Defang any raw instruction tags inside document content
-            sanitized = sanitized.replace("<system>", "&lt;system&gt;").replace("</system>", "&lt;/system&gt;")
+            sanitized = sanitized.replace("<system>", "&lt;system&gt;").replace(
+                "</system>", "&lt;/system&gt;"
+            )
             chunk_element = (
                 f'<document index="{i}" id="{chunk.id}" doc_id="{chunk.doc_id}" '
                 f'title="{chunk.title}" section="{chunk.section_path}">\n'

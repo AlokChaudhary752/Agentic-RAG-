@@ -131,7 +131,9 @@ def main() -> int:
                 f"Faithfulness {ag.mean_faithfulness:.4f} < threshold {args.min_faithfulness}"
             )
         else:
-            print(f"✅ Faithfulness Gate PASSED ({ag.mean_faithfulness:.4f} >= {args.min_faithfulness})")
+            print(
+                f"✅ Faithfulness Gate PASSED ({ag.mean_faithfulness:.4f} >= {args.min_faithfulness})"
+            )
 
         if ag.mean_context_precision < args.min_context_precision:
             failed_gates.append(

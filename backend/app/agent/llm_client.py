@@ -31,7 +31,9 @@ class LLMService:
         self.settings = settings or get_settings()
         self.fast_model = getattr(self.settings, "llm_fast_model", "gemini-1.5-flash")
         self.strong_model = getattr(
-            self.settings, "llm_strong_model", getattr(self.settings, "llm_primary_model", "gemini-1.5-pro")
+            self.settings,
+            "llm_strong_model",
+            getattr(self.settings, "llm_primary_model", "gemini-1.5-pro"),
         )
 
     def classify_intent(self, query: str) -> str:
@@ -41,7 +43,15 @@ class LLMService:
         words = re.findall(r"\w+", q)
         if words and words[0] in {"hi", "hello", "hey", "howdy", "greetings"}:
             return "chit_chat"
-        if q in {"thanks", "thank you", "good morning", "good evening", "good afternoon", "bye", "goodbye"}:
+        if q in {
+            "thanks",
+            "thank you",
+            "good morning",
+            "good evening",
+            "good afternoon",
+            "bye",
+            "goodbye",
+        }:
             return "chit_chat"
 
         # Action requests
@@ -55,11 +65,19 @@ class LLMService:
         if re.search(r"\b(?:status\s+of\s+ticket|ticket\s+status)\b", q, re.IGNORECASE):
             return "action_request"
 
-        if re.search(r"\b[A-Z]{2,10}-\d+\b", query) and any(w in q for w in ["status", "check", "progress"]):
+        if re.search(r"\b[A-Z]{2,10}-\d+\b", query) and any(
+            w in q for w in ["status", "check", "progress"]
+        ):
             return "action_request"
 
         # Multi-hop queries
-        comparison_keywords = ["compare", "difference between", "versus", " vs ", "how does x relate to y"]
+        comparison_keywords = [
+            "compare",
+            "difference between",
+            "versus",
+            " vs ",
+            "how does x relate to y",
+        ]
         if any(kw in q for kw in comparison_keywords):
             return "multi_hop"
 
@@ -71,7 +89,21 @@ class LLMService:
             return "irrelevant", 0.0
 
         query_terms = set(re.findall(r"\w+", query.lower()))
-        stop_words = {"what", "is", "the", "for", "and", "in", "of", "to", "how", "a", "an", "does", "do"}
+        stop_words = {
+            "what",
+            "is",
+            "the",
+            "for",
+            "and",
+            "in",
+            "of",
+            "to",
+            "how",
+            "a",
+            "an",
+            "does",
+            "do",
+        }
         meaningful_terms = query_terms - stop_words
 
         if not meaningful_terms:
@@ -102,11 +134,27 @@ class LLMService:
         """Synthesize factual answer strictly grounded in retrieved chunks with citations."""
         # Filter chunks by query relevance to prevent hallucinating from unrelated nearest neighbors
         query_terms = set(re.findall(r"\w+", query.lower())) - {
-            "what", "is", "the", "for", "and", "in", "of", "to", "how", "a", "an", "does", "do", "are", "at"
+            "what",
+            "is",
+            "the",
+            "for",
+            "and",
+            "in",
+            "of",
+            "to",
+            "how",
+            "a",
+            "an",
+            "does",
+            "do",
+            "are",
+            "at",
         }
         if query_terms and chunks:
             relevant_chunks = [
-                c for c in chunks if query_terms.intersection(set(re.findall(r"\w+", c.content.lower())))
+                c
+                for c in chunks
+                if query_terms.intersection(set(re.findall(r"\w+", c.content.lower())))
             ]
             chunks = relevant_chunks
 
@@ -156,7 +204,9 @@ class LLMService:
     ) -> VerificationResult:
         """Perform claim-level verification asserting answer claims are supported by context."""
         if not chunks:
-            return VerificationResult(faithfulness_score=1.0, unsupported_claims=[], is_faithful=True)
+            return VerificationResult(
+                faithfulness_score=1.0, unsupported_claims=[], is_faithful=True
+            )
 
         combined_context = " ".join(c.content.lower() for c in chunks)
         sentences = [s.strip() for s in answer.split(".") if len(s.strip()) > 15]
@@ -166,7 +216,10 @@ class LLMService:
 
         for sentence in sentences:
             # Skip conflict notices and metadata headers
-            if "notice on document" in sentence.lower() or "sufficient information" in sentence.lower():
+            if (
+                "notice on document" in sentence.lower()
+                or "sufficient information" in sentence.lower()
+            ):
                 supported_count += 1
                 continue
 

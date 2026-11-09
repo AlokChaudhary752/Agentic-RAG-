@@ -74,4 +74,3 @@ class AgentState(TypedDict, total=False):
     follow_up_suggestions: list[str]
     steps_executed: Annotated[list[str], append_steps]
     token_usage: dict[str, int]
-

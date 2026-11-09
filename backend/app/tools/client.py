@@ -111,7 +111,9 @@ class MCPClient:
 
         # 1. Allow-list check
         if not self.is_tool_allowed(tool_name):
-            logger.warning("Tool execution blocked by allow-list", tool=tool_name, user=principal.user_id)
+            logger.warning(
+                "Tool execution blocked by allow-list", tool=tool_name, user=principal.user_id
+            )
             return ToolCallResult(
                 tool_name=tool_name,
                 risk_level=risk_level,
@@ -137,14 +139,22 @@ class MCPClient:
 
         # 3. Risk-level human approval gate
         if risk_level == ToolRiskLevel.WRITE_HIGH and not approval_granted:
-            logger.info("Human approval required before executing tool", tool=tool_name, user=principal.user_id)
+            logger.info(
+                "Human approval required before executing tool",
+                tool=tool_name,
+                user=principal.user_id,
+            )
             return ToolCallResult(
                 tool_name=tool_name,
                 risk_level=risk_level,
                 caller_user_id=principal.user_id,
                 success=False,
                 error=f"Execution blocked: High-risk action '{tool_name}' requires human approval.",
-                data={"approval_required": True, "tool_name": tool_name, "arguments": validated_args},
+                data={
+                    "approval_required": True,
+                    "tool_name": tool_name,
+                    "arguments": validated_args,
+                },
                 execution_time_ms=(time.perf_counter() - start_time) * 1000,
             )
 
@@ -233,7 +243,9 @@ class MCPClient:
 
         # 1. Allow-list check
         if not self.is_tool_allowed(tool_name):
-            logger.warning("Tool execution blocked by allow-list", tool=tool_name, user=principal.user_id)
+            logger.warning(
+                "Tool execution blocked by allow-list", tool=tool_name, user=principal.user_id
+            )
             return ToolCallResult(
                 tool_name=tool_name,
                 risk_level=risk_level,
@@ -259,14 +271,22 @@ class MCPClient:
 
         # 3. Risk-level human approval gate
         if risk_level == ToolRiskLevel.WRITE_HIGH and not approval_granted:
-            logger.info("Human approval required before executing tool", tool=tool_name, user=principal.user_id)
+            logger.info(
+                "Human approval required before executing tool",
+                tool=tool_name,
+                user=principal.user_id,
+            )
             return ToolCallResult(
                 tool_name=tool_name,
                 risk_level=risk_level,
                 caller_user_id=principal.user_id,
                 success=False,
                 error=f"Execution blocked: High-risk action '{tool_name}' requires human approval.",
-                data={"approval_required": True, "tool_name": tool_name, "arguments": validated_args},
+                data={
+                    "approval_required": True,
+                    "tool_name": tool_name,
+                    "arguments": validated_args,
+                },
                 execution_time_ms=(time.perf_counter() - start_time) * 1000,
             )
 
@@ -318,7 +338,9 @@ class MCPClient:
             try:
                 await self.audit_service.record_tool_call(
                     principal=principal,
-                    query=validated_args.get("summary") or validated_args.get("subject") or tool_name,
+                    query=validated_args.get("summary")
+                    or validated_args.get("subject")
+                    or tool_name,
                     tool_name=tool_name,
                     risk_level=risk_level.value,
                     approved=approval_granted,
@@ -371,4 +393,3 @@ def reset_mcp_client() -> None:
     """Reset the client singleton instance (primarily for test isolation)."""
     global _client_instance
     _client_instance = None
-

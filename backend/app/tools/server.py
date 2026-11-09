@@ -228,7 +228,9 @@ class EnterpriseMCPServer:
                 # Also index by filename stem for ergonomic lookup
                 self.documents[file_path.stem] = doc
             except Exception as e:
-                logger.debug("Failed parsing document for tool server", path=str(file_path), err=str(e))
+                logger.debug(
+                    "Failed parsing document for tool server", path=str(file_path), err=str(e)
+                )
 
     def register_document(self, doc: RawDocument) -> None:
         """Manually register or update a document in the server's catalog."""
@@ -590,7 +592,9 @@ class EnterpriseMCPServer:
         async def list_recent_changes(days_back: int = 7, limit: int = 10) -> dict[str, Any]:
             """List recent document modifications accessible to the caller."""
             principal = current_user_principal.get()
-            res = await self.list_recent_changes_async(days_back=days_back, limit=limit, principal=principal)
+            res = await self.list_recent_changes_async(
+                days_back=days_back, limit=limit, principal=principal
+            )
             return res.model_dump()
 
         @self.mcp.tool()
@@ -628,4 +632,3 @@ def reset_enterprise_mcp_server() -> None:
     """Reset the singleton instance (primarily for test isolation)."""
     global _server_instance
     _server_instance = None
-

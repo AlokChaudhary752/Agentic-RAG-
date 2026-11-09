@@ -354,4 +354,3 @@ async def test_server_call_tool_async_unified(
     )
     assert result["project"] == "ENG"
     assert result["reporter"] == "mgr_bob"
-

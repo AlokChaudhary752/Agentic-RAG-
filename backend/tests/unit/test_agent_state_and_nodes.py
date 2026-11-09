@@ -1,6 +1,5 @@
 """Unit tests for LangGraph node execution functions and state transitions."""
 
-
 import pytest
 
 from app.agent.nodes import AgentNodeExecutor
@@ -101,7 +100,9 @@ def test_grade_evidence_and_reflection(
         chunk_index=1,
         title="PTO Policy",
         content="Employees receive twenty-five days of paid annual vacation leave.",
-        acl=DocumentACL(allowed_groups=["group_all"], classification_level=ClassificationLevel.INTERNAL),
+        acl=DocumentACL(
+            allowed_groups=["group_all"], classification_level=ClassificationLevel.INTERNAL
+        ),
     )
 
     # Relevant query

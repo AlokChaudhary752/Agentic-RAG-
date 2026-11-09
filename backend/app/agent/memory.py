@@ -52,4 +52,3 @@ class ConversationMemoryManager:
         removed = self._long_term_store.pop(key, None) is not None
         logger.info("Purged long-term user memory", user_id=user_id, success=removed)
         return removed
-

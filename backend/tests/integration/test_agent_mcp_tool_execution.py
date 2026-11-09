@@ -67,7 +67,9 @@ def test_agent_graph_create_jira_ticket_with_approval(
 
     # 1. First invocation without approval: approval_required should be True
     state_pending: AgentState = {
-        "messages": [{"role": "user", "content": "Create a Jira ticket to patch OpenSSL vulnerability"}],
+        "messages": [
+            {"role": "user", "content": "Create a Jira ticket to patch OpenSSL vulnerability"}
+        ],
         "principal": principal_bob,
         "query": "Create a Jira ticket to patch OpenSSL vulnerability",
         "thread_id": "thread-create-jira-001",
@@ -107,7 +109,9 @@ def test_agent_graph_create_jira_ticket_rejection(
     graph = create_agent_graph(executor=executor_with_tools)
 
     state_rejected: AgentState = {
-        "messages": [{"role": "user", "content": "Create a Jira ticket to reboot production redis"}],
+        "messages": [
+            {"role": "user", "content": "Create a Jira ticket to reboot production redis"}
+        ],
         "principal": principal_bob,
         "query": "Create a Jira ticket to reboot production redis",
         "thread_id": "thread-reject-jira-001",
@@ -122,7 +126,10 @@ def test_agent_graph_create_jira_ticket_rejection(
 
     assert result.get("tool_result") is not None
     assert result["tool_result"]["status"] == "rejected"
-    assert "denied" in result["final_response"].lower() or "rejected" in result["final_response"].lower()
+    assert (
+        "denied" in result["final_response"].lower()
+        or "rejected" in result["final_response"].lower()
+    )
 
 
 def test_agent_graph_send_summary_email_auto_executes(
@@ -132,7 +139,9 @@ def test_agent_graph_send_summary_email_auto_executes(
     graph = create_agent_graph(executor=executor_with_tools)
 
     state: AgentState = {
-        "messages": [{"role": "user", "content": "Send email summary of the leave policy to manager"}],
+        "messages": [
+            {"role": "user", "content": "Send email summary of the leave policy to manager"}
+        ],
         "principal": principal_bob,
         "query": "Send email summary of the leave policy to manager",
         "thread_id": "thread-email-001",
@@ -177,4 +186,3 @@ async def test_chat_completions_api_with_mcp_action(async_client: AsyncClient) -
     payload = response.json()
     assert "NIMBUS-1001" in payload["answer"]
     assert "In Progress" in payload["answer"]
-

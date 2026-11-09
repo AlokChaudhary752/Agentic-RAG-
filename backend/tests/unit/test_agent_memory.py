@@ -51,4 +51,3 @@ def test_long_term_user_memory_lifecycle() -> None:
 
     # 4. Verify context is deleted
     assert manager.get_user_memory(tenant_id, user_id) == {}
-

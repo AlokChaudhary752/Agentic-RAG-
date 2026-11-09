@@ -60,7 +60,9 @@ def test_agent_graph_factual_lookup(test_principal: UserPrincipal) -> None:
 
     thread_id = str(uuid.uuid4())
     input_state: AgentState = {
-        "messages": [{"role": "user", "content": "How many days of annual vacation do employees get?"}],
+        "messages": [
+            {"role": "user", "content": "How many days of annual vacation do employees get?"}
+        ],
         "principal": test_principal,
         "thread_id": thread_id,
         "tenant_id": test_principal.tenant_id,
@@ -134,4 +136,7 @@ def test_agent_graph_action_approval_workflow(test_principal: UserPrincipal) -> 
 
     assert "decide_action" in result["steps_executed"]
     assert "human_approval" in result["steps_executed"]
-    assert "create_jira_ticket" in result["final_response"] or "ticket" in result["final_response"].lower()
+    assert (
+        "create_jira_ticket" in result["final_response"]
+        or "ticket" in result["final_response"].lower()
+    )

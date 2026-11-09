@@ -36,7 +36,9 @@ class SemanticCacheService:
 
     def __init__(self, settings: Settings | None = None) -> None:
         self.settings = settings or get_settings()
-        self._memory_cache: dict[str, tuple[str, float]] = {}  # key -> (serialized_json, expire_timestamp)
+        self._memory_cache: dict[
+            str, tuple[str, float]
+        ] = {}  # key -> (serialized_json, expire_timestamp)
         self.default_ttl = 3600
 
     def compute_cache_key(self, query: str, principal: UserPrincipal) -> str:

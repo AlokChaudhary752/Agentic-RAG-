@@ -78,7 +78,21 @@ class RagasMetricsEvaluator:
                 continue
 
             words = set(re.findall(r"\w+", sentence.lower()))
-            stop_words = {"the", "and", "is", "in", "to", "of", "a", "an", "that", "it", "for", "on", "with"}
+            stop_words = {
+                "the",
+                "and",
+                "is",
+                "in",
+                "to",
+                "of",
+                "a",
+                "an",
+                "that",
+                "it",
+                "for",
+                "on",
+                "with",
+            }
             meaningful_words = words - stop_words
 
             if not meaningful_words:
@@ -107,7 +121,13 @@ class RagasMetricsEvaluator:
 
         # If refusal is expected (unauthorized or unanswerable query)
         if expected_refusal:
-            refusal_terms = ["not have sufficient information", "authorized", "cannot assist", "policy", "access forbidden"]
+            refusal_terms = [
+                "not have sufficient information",
+                "authorized",
+                "cannot assist",
+                "policy",
+                "access forbidden",
+            ]
             if any(term in answer_lower for term in refusal_terms):
                 return 1.0
 
@@ -123,7 +143,15 @@ class RagasMetricsEvaluator:
         keyword_score = matched / len(expected_keywords)
 
         # Query term semantic alignment
-        query_terms = set(re.findall(r"\w+", query.lower())) - {"what", "is", "how", "are", "do", "the", "at"}
+        query_terms = set(re.findall(r"\w+", query.lower())) - {
+            "what",
+            "is",
+            "how",
+            "are",
+            "do",
+            "the",
+            "at",
+        }
         answer_terms = set(re.findall(r"\w+", answer_lower))
         query_overlap = len(query_terms.intersection(answer_terms)) / max(len(query_terms), 1)
 
@@ -213,7 +241,9 @@ class RagasMetricsEvaluator:
         # 2. Retrieval Leak: Check if any retrieved chunk violated caller clearance or ACL
         for chunk in retrieved_chunks:
             if isinstance(chunk, DocumentChunk):
-                if not chunk.acl.permits_user(principal.user_id, principal.groups, principal.clearance):
+                if not chunk.acl.permits_user(
+                    principal.user_id, principal.groups, principal.clearance
+                ):
                     return True
             elif isinstance(chunk, dict):
                 # Dict representation from naive baseline

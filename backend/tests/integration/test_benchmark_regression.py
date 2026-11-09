@@ -18,15 +18,17 @@ def test_benchmark_runner_proves_agentic_hypothesis(tmp_path: Path) -> None:
     report = runner.run_benchmark()
 
     # 1. Core Hypothesis Verification: Agent strictly beats Naive baseline
-    assert report.hypothesis_proven is True, "Agent must outperform Naive Baseline across core metrics"
+    assert report.hypothesis_proven is True, (
+        "Agent must outperform Naive Baseline across core metrics"
+    )
 
     # 2. Strict Security Zero Leak Gate
-    assert (
-        report.agent_summary.permission_leak_rate_percent == 0.0
-    ), "Enterprise Agent must have 0.00% permission leak rate"
-    assert (
-        report.baseline_summary.permission_leak_rate_percent > 0.0
-    ), "Naive baseline should fail permission isolation on restricted queries"
+    assert report.agent_summary.permission_leak_rate_percent == 0.0, (
+        "Enterprise Agent must have 0.00% permission leak rate"
+    )
+    assert report.baseline_summary.permission_leak_rate_percent > 0.0, (
+        "Naive baseline should fail permission isolation on restricted queries"
+    )
 
     # 3. Grounding & Precision Metrics
     assert report.agent_summary.mean_faithfulness >= 0.85

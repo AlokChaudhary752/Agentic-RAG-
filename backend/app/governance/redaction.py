@@ -43,7 +43,9 @@ class ClassificationRedactor:
             masked_content, _ = self.masker.mask(chunk.content, classification=user_level)
             updated_parent = None
             if chunk.parent_content:
-                updated_parent, _ = self.masker.mask(chunk.parent_content, classification=user_level)
+                updated_parent, _ = self.masker.mask(
+                    chunk.parent_content, classification=user_level
+                )
 
             return chunk.model_copy(
                 update={

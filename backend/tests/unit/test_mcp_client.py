@@ -92,7 +92,11 @@ def test_mcp_client_allow_list_blocking(
     # Attempting to execute create_jira_ticket should be blocked immediately
     result = client.execute_sync(
         tool_name="create_jira_ticket",
-        arguments={"summary": "Test summary", "project": "NIMBUS", "description": "Valid description length"},
+        arguments={
+            "summary": "Test summary",
+            "project": "NIMBUS",
+            "description": "Valid description length",
+        },
         principal=principal_alice,
         approval_granted=True,
     )
@@ -238,4 +242,3 @@ async def test_mcp_client_async_execution_and_audit_logging(
     call_kwargs = mock_audit.record_tool_call.call_args.kwargs
     assert call_kwargs["tool_name"] == "send_summary_email"
     assert call_kwargs["correlation_id"] == "corr-mcp-test-1"
-

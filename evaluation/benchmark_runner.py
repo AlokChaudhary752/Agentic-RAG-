@@ -111,7 +111,9 @@ class BenchmarkRunner:
                     chunks = chunker.chunk_document(doc)
                     all_chunks.extend(chunks)
                 except Exception as e:
-                    logger.debug("Failed parsing document for benchmark", path=str(file_path), err=str(e))
+                    logger.debug(
+                        "Failed parsing document for benchmark", path=str(file_path), err=str(e)
+                    )
 
             if all_chunks:
                 qdrant.upsert_chunks_sync(all_chunks)
@@ -191,7 +193,10 @@ class BenchmarkRunner:
                 test_case_id=tc.id,
                 faithfulness=self.evaluator.calculate_faithfulness(agent_answer, agent_contexts),
                 answer_relevance=self.evaluator.calculate_answer_relevance(
-                    tc.query, agent_answer, tc.expected_answer_keywords, expected_refusal=tc.expected_refusal
+                    tc.query,
+                    agent_answer,
+                    tc.expected_answer_keywords,
+                    expected_refusal=tc.expected_refusal,
                 ),
                 context_precision=self.evaluator.calculate_context_precision(
                     agent_chunk_doc_ids, tc.expected_doc_ids, expected_refusal=tc.expected_refusal
@@ -223,7 +228,10 @@ class BenchmarkRunner:
                 test_case_id=tc.id,
                 faithfulness=self.evaluator.calculate_faithfulness(base_answer, base_contexts),
                 answer_relevance=self.evaluator.calculate_answer_relevance(
-                    tc.query, base_answer, tc.expected_answer_keywords, expected_refusal=tc.expected_refusal
+                    tc.query,
+                    base_answer,
+                    tc.expected_answer_keywords,
+                    expected_refusal=tc.expected_refusal,
                 ),
                 context_precision=self.evaluator.calculate_context_precision(
                     base_chunk_doc_ids, tc.expected_doc_ids, expected_refusal=tc.expected_refusal
@@ -257,8 +265,12 @@ class BenchmarkRunner:
             )
 
         # 3. Calculate Summaries
-        agent_summary = self._calculate_summary("Enterprise Knowledge Agent (Agentic RAG)", agent_scores)
-        baseline_summary = self._calculate_summary("Naive RAG Baseline (Un-governed)", baseline_scores)
+        agent_summary = self._calculate_summary(
+            "Enterprise Knowledge Agent (Agentic RAG)", agent_scores
+        )
+        baseline_summary = self._calculate_summary(
+            "Naive RAG Baseline (Un-governed)", baseline_scores
+        )
 
         # 4. Hypothesis Verification
         hypothesis_proven = (
@@ -278,9 +290,7 @@ class BenchmarkRunner:
 
         return report
 
-    def _calculate_summary(
-        self, name: str, scores: list[EvaluationScores]
-    ) -> BenchmarkSummary:
+    def _calculate_summary(self, name: str, scores: list[EvaluationScores]) -> BenchmarkSummary:
         """Aggregate granular scores into benchmark summary metrics."""
         n = max(len(scores), 1)
         mean_faith = sum(s.faithfulness for s in scores) / n
@@ -334,7 +344,7 @@ class BenchmarkRunner:
 ## 1. Executive Summary
 This document records empirical evaluation results comparing the **Enterprise Knowledge Agent** (Permission-Aware Agentic RAG with Self-RAG reflection, conflict resolution, and claim verification) against a **Naive RAG Baseline** (simple top-$k$ dense similarity retrieval without pre-filtering or iterative reasoning).
 
-**Hypothesis Proven**: **{'YES' if report.hypothesis_proven else 'NO'}**
+**Hypothesis Proven**: **{"YES" if report.hypothesis_proven else "NO"}**
 - The Enterprise Agentic RAG platform achieves **0.00% permission leak rate**, compared to **{bl.permission_leak_rate_percent}%** for the Naive baseline.
 - **Faithfulness**: Agent **{ag.mean_faithfulness * 100:.1f}%** vs Naive **{bl.mean_faithfulness * 100:.1f}%** (+{(ag.mean_faithfulness - bl.mean_faithfulness) * 100:.1f}% improvement).
 - **Context Precision**: Agent **{ag.mean_context_precision * 100:.1f}%** vs Naive **{bl.mean_context_precision * 100:.1f}%** (+{(ag.mean_context_precision - bl.mean_context_precision) * 100:.1f}% improvement).

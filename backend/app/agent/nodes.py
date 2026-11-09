@@ -38,6 +38,7 @@ class AgentNodeExecutor:
     def ensure_corpus_indexed(self, corpus_dir: Any = None) -> None:
         """Index sample corpus into Qdrant and BM25 if not already populated."""
         from pathlib import Path
+
         path = Path(corpus_dir or "data/sample_corpus")
         if not path.exists():
             return
@@ -112,7 +113,9 @@ class AgentNodeExecutor:
 
     def retrieve(self, state: AgentState) -> dict[str, Any]:
         """Execute hybrid retrieval with vector-level ACL pre-filtering and defense-in-depth."""
-        search_query = state.get("reformulated_query") or state.get("sub_queries", [state["query"]])[0]
+        search_query = (
+            state.get("reformulated_query") or state.get("sub_queries", [state["query"]])[0]
+        )
         principal = state["principal"]
         current_iter = state.get("retrieval_iteration", 0) + 1
 
@@ -158,7 +161,9 @@ class AgentNodeExecutor:
         conflict_res = self.conflict_resolver.resolve(chunks)
 
         # Sanitize and scan for prompt injections
-        clean_chunks = [self.defense.scan_and_quarantine_chunk(c) for c in conflict_res.resolved_chunks]
+        clean_chunks = [
+            self.defense.scan_and_quarantine_chunk(c) for c in conflict_res.resolved_chunks
+        ]
 
         return {
             "resolved_chunks": clean_chunks,
@@ -212,7 +217,9 @@ class AgentNodeExecutor:
         if intent == "action_request" and principal:
             if any(kw in query for kw in ["jira", "ticket", "bug", "issue"]):
                 status_match = re.search(r"\b([A-Z]{2,10}-\d+)\b", raw_query)
-                if status_match and any(w in query for w in ["status", "check", "progress", "show", "get"]):
+                if status_match and any(
+                    w in query for w in ["status", "check", "progress", "show", "get"]
+                ):
                     tool_name = "get_ticket_status"
                     tool_risk = self.mcp_client.get_tool_risk(tool_name)
                     tool_risk_level = tool_risk.value
@@ -267,7 +274,8 @@ class AgentNodeExecutor:
                 email_args: dict[str, Any] = {
                     "recipient_email": principal.email,
                     "subject": "Enterprise Knowledge Summary",
-                    "body": state.get("draft_answer") or f"Knowledge summary for request: {raw_query}",
+                    "body": state.get("draft_answer")
+                    or f"Knowledge summary for request: {raw_query}",
                 }
                 tool_request = {
                     "tool": tool_name,
@@ -325,7 +333,9 @@ class AgentNodeExecutor:
             if principal and tool_name and tool_name in self.mcp_client.allowed_tools:
                 args = tool_req.get("arguments", {})
                 if tool_name == "create_jira_ticket":
-                    args.setdefault("description", f"Action requested: {args.get('summary', 'Task')}")
+                    args.setdefault(
+                        "description", f"Action requested: {args.get('summary', 'Task')}"
+                    )
                 res = self.mcp_client.execute_sync(
                     tool_name=tool_name,
                     arguments=args,
@@ -362,7 +372,10 @@ class AgentNodeExecutor:
 
         if intent == "chit_chat":
             final_response = "Hello! I am your Enterprise Knowledge Agent. How can I assist you with company documents today?"
-            suggestions = ["What is the PTO leave policy?", "Where are the engineering coding standards?"]
+            suggestions = [
+                "What is the PTO leave policy?",
+                "Where are the engineering coding standards?",
+            ]
             confidence = 1.0
         elif tool_res:
             data = tool_res.get("data")
@@ -374,8 +387,12 @@ class AgentNodeExecutor:
                 elif "ticket_id" in data and "status" in data:
                     final_response = f"Ticket {data['ticket_id']} is currently '{data['status']}' with priority '{data['priority']}' (Assignee: {data.get('assignee') or 'Unassigned'})."
                 elif "documents" in data:
-                    doc_titles = [d.get("title", d.get("doc_id")) for d in data.get("documents", [])]
-                    final_response = f"Found {len(doc_titles)} recent document changes: {', '.join(doc_titles)}."
+                    doc_titles = [
+                        d.get("title", d.get("doc_id")) for d in data.get("documents", [])
+                    ]
+                    final_response = (
+                        f"Found {len(doc_titles)} recent document changes: {', '.join(doc_titles)}."
+                    )
                 else:
                     final_response = tool_res.get("message", "Action completed successfully.")
             elif tool_res.get("status") == "rejected":

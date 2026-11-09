@@ -129,4 +129,3 @@ def test_no_conflicts_on_distinct_topics(base_acl: DocumentACL) -> None:
     assert result.has_conflicts is False
     assert len(result.notices) == 0
     assert len(result.resolved_chunks) == 2
-

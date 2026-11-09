@@ -56,15 +56,13 @@ class CostTracker:
         cost_usd = self.calculate_cost_usd(model, prompt_tokens, completion_tokens)
 
         # Update Prometheus metrics
-        TOKEN_USAGE_COUNTER.labels(
-            tenant_id=tenant_id, model=model, token_type="prompt"
-        ).inc(prompt_tokens)
-        TOKEN_USAGE_COUNTER.labels(
-            tenant_id=tenant_id, model=model, token_type="completion"
-        ).inc(completion_tokens)
-        ESTIMATED_COST_COUNTER.labels(
-            tenant_id=tenant_id, model=model
-        ).inc(cost_usd)
+        TOKEN_USAGE_COUNTER.labels(tenant_id=tenant_id, model=model, token_type="prompt").inc(
+            prompt_tokens
+        )
+        TOKEN_USAGE_COUNTER.labels(tenant_id=tenant_id, model=model, token_type="completion").inc(
+            completion_tokens
+        )
+        ESTIMATED_COST_COUNTER.labels(tenant_id=tenant_id, model=model).inc(cost_usd)
 
         logger.debug(
             "Tracked LLM token usage",
@@ -112,4 +110,3 @@ def get_cost_tracker() -> CostTracker:
     if _cost_tracker is None:
         _cost_tracker = CostTracker()
     return _cost_tracker
-

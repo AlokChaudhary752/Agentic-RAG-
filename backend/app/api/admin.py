@@ -26,10 +26,15 @@ async def get_evaluation_results() -> dict[str, Any]:
                     data["summary"] = {
                         "total_test_cases": agent_sum.get("total_queries", 15),
                         "hypothesis_proven": data.get("hypothesis_proven", True),
-                        "zero_permission_leaks": agent_sum.get("permission_leak_rate_percent", 0.0) == 0.0,
+                        "zero_permission_leaks": agent_sum.get("permission_leak_rate_percent", 0.0)
+                        == 0.0,
                         "mean_faithfulness_agent": agent_sum.get("mean_faithfulness", 0.9933),
-                        "mean_context_precision_agent": agent_sum.get("mean_context_precision", 0.7667),
-                        "mean_answer_relevance_agent": agent_sum.get("mean_answer_relevance", 0.6601),
+                        "mean_context_precision_agent": agent_sum.get(
+                            "mean_context_precision", 0.7667
+                        ),
+                        "mean_answer_relevance_agent": agent_sum.get(
+                            "mean_answer_relevance", 0.6601
+                        ),
                     }
                 if "comparison_table" not in data and agent_sum and baseline_sum:
                     data["comparison_table"] = [

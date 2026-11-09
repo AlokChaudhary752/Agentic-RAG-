@@ -52,4 +52,3 @@ async def test_zero_cache_permission_leak_across_users() -> None:
     assert alice_hit is None, (
         "CRITICAL SECURITY LEAK: Alice was able to access Bob's cached confidential response!"
     )
-

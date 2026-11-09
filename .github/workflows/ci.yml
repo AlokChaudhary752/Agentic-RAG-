@@ -81,11 +81,7 @@ jobs:
           pip install uv
           uv pip install --system -e ".[dev]"
 
-      - name: Run Unit Tests with Coverage
+      - name: Run Test Suite with Coverage Gate
         run: |
-          pytest backend/tests/unit --cov=backend/app --cov-report=term --cov-report=xml --cov-fail-under=85
-
-      - name: Run Integration Tests
-        run: |
-          pytest backend/tests/integration
+          pytest backend/tests --cov=backend/app --cov-report=term --cov-report=xml --cov-fail-under=85
 
