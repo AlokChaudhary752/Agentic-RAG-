@@ -6,12 +6,12 @@ import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { CitationsPanel } from "./CitationsPanel";
 import { ChatMessage, Citation, Persona } from "@/lib/types";
-import { getActivePersona, setActivePersona } from "@/lib/personas";
+import { PERSONAS, getActivePersona, setActivePersona } from "@/lib/personas";
 import { sendChatMessage, submitToolApproval } from "@/lib/api";
 import { Trash2, ShieldAlert, Sparkles, PanelRightClose, PanelRightOpen } from "lucide-react";
 
 export const ChatWindow: React.FC = () => {
-  const [persona, setPersona] = useState<Persona>(getActivePersona());
+  const [persona, setPersona] = useState<Persona>(PERSONAS[0]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -19,23 +19,33 @@ export const ChatWindow: React.FC = () => {
   const [showCitationsPanel, setShowCitationsPanel] = useState(true);
   const [selectedCitationIndex, setSelectedCitationIndex] = useState<number | null>(null);
 
-  // Initialize with greeting
+  // Initialize once on client mount to eliminate SSR hydration mismatches
   useEffect(() => {
+    const active = getActivePersona();
+    setPersona(active);
     const initialGreeting: ChatMessage = {
       id: "msg-welcome",
       role: "assistant",
-      content: `Hello ${persona.name.split(" ")[0]}! I am the Enterprise Knowledge Agent. I answer questions over company documents (Google Drive, Notion, Confluence, Slack, Jira, PDFs) and execute authorized tools with strict permission isolation.\n\nAsk any question or pick a suggestion below to begin.`,
+      content: `Hello ${active.name.split(" ")[0]}! I am the Enterprise Knowledge Agent. I answer questions over company documents (Google Drive, Notion, Confluence, Slack, Jira, PDFs) and execute authorized tools with strict permission isolation.\n\nAsk any question or pick a suggestion below to begin.`,
       timestamp: new Date().toISOString(),
     };
     setMessages([initialGreeting]);
     setThreadId(`thread-${Date.now()}`);
-  }, [persona]);
+  }, []);
 
   const handleSelectPersona = (newPersona: Persona) => {
     setActivePersona(newPersona);
     setPersona(newPersona);
     setActiveCitations([]);
     setSelectedCitationIndex(null);
+    const greeting: ChatMessage = {
+      id: `msg-welcome-${Date.now()}`,
+      role: "assistant",
+      content: `Switched active persona to ${newPersona.name} (${newPersona.clearance} clearance). Knowledge retrieval will now be restricted to your authorized ACLs.\n\nAsk any question or pick a suggestion below to begin.`,
+      timestamp: new Date().toISOString(),
+    };
+    setMessages([greeting]);
+    setThreadId(`thread-${Date.now()}`);
   };
 
   const handleSendMessage = async (query: string) => {

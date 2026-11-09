@@ -35,13 +35,14 @@ export const MessageList: React.FC<MessageListProps> = ({
     setExpandedSteps((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const renderContentWithCitations = (content: string, citations?: Citation[]) => {
+  const renderContentWithCitations = (content?: string, citations?: Citation[]) => {
+    const text = content || "";
     if (!citations || citations.length === 0) {
-      return <p className="whitespace-pre-wrap leading-relaxed">{content}</p>;
+      return <p className="whitespace-pre-wrap leading-relaxed">{text}</p>;
     }
 
     // Split text and replace [^1], [^2], [1] with interactive badge links
-    const parts = content.split(/(\[\^?\d+\])/g);
+    const parts = text.split(/(\[\^?\d+\])/g);
     return (
       <div className="whitespace-pre-wrap leading-relaxed">
         {parts.map((part, i) => {
@@ -185,11 +186,13 @@ export const MessageList: React.FC<MessageListProps> = ({
               {/* Timestamp & Confidence Metadata */}
               <div className="flex items-center gap-2 mt-1 px-1 text-[11px] text-slate-500">
                 <Clock className="w-3 h-3" />
-                <span>
-                  {new Date(message.timestamp).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                <span suppressHydrationWarning>
+                  {message.timestamp
+                    ? new Date(message.timestamp).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : ""}
                 </span>
                 {!isUser && message.confidence !== undefined && (
                   <>
