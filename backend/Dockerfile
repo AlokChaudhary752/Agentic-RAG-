@@ -1,5 +1,5 @@
 # Dockerfile for Backend Service
-FROM python:3.11-slim as base
+FROM python:3.12-slim as base
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -24,9 +24,10 @@ COPY pyproject.toml README.md ./
 # Install python dependencies
 RUN uv pip install --system -e .
 
-# Copy application code
+# Copy application code and sample corpus
 COPY backend/ ./backend/
 COPY scripts/ ./scripts/
+COPY data/ ./data/
 
 ENV PYTHONPATH=/app/backend
 

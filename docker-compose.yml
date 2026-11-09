@@ -56,10 +56,10 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - "3000:3000"
+      - "3003:3000"
     environment:
       DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/enterprise_agent
-      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_URL: http://localhost:3003
       NEXTAUTH_SECRET: langfuse-secret-key-development-placeholder
       SALT: langfuse-salt-key-development-placeholder
       TELEMETRY_ENABLED: "false"
@@ -99,9 +99,10 @@ services:
     depends_on:
       - backend
     ports:
-      - "3001:3000"
+      - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
+      BACKEND_INTERNAL_URL: http://backend:8000
 
   prometheus:
     image: prom/prometheus:v2.54.1
